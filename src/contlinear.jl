@@ -3,7 +3,7 @@ using MathOptInterfaceUtilities # Defines isapprox for ScalarAffineFunction
 # Continuous linear problems
 
 # Basic solver, query, resolve
-function linear1test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear1test(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
     # simple 2 variable, 1 constraint problem
@@ -330,7 +330,7 @@ function linear1test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # addvariable! (one by one)
-function linear2test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear2test(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
     # Min -x
@@ -395,7 +395,7 @@ function linear2test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # Issue #40 from Gurobi.jl
-function linear3test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear3test(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
     # min  x
@@ -468,7 +468,7 @@ function linear3test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # Modify GreaterThan and LessThan sets as bounds
-function linear4test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear4test(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
 
@@ -526,7 +526,7 @@ function linear4test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # Change coeffs, del constr, del var
-function linear5test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear5test(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
     @test MOI.get(solver, MOI.SupportsDeleteVariable())
@@ -662,7 +662,7 @@ function linear5test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # Modify GreaterThan and LessThan sets as linear constraints
-function linear6test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear6test(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
 
@@ -720,7 +720,7 @@ function linear6test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # Modify constants in Nonnegatives and Nonpositives
-function linear7test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear7test(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
 
@@ -778,7 +778,7 @@ function linear7test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # infeasible problem
-function linear8atest(solver::MOI.AbstractSolver, config::TestConfig)
+function linear8atest(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
     # min x
@@ -822,7 +822,7 @@ function linear8atest(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # unbounded problem
-function linear8btest(solver::MOI.AbstractSolver, config::TestConfig)
+function linear8btest(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
     # min -x-y
@@ -856,7 +856,7 @@ function linear8btest(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # unbounded problem with unique ray
-function linear8ctest(solver::MOI.AbstractSolver, config::TestConfig)
+function linear8ctest(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
     # min -x-y
@@ -894,7 +894,7 @@ function linear8ctest(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # addconstraints
-function linear9test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear9test(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
     #   maximize 1000 x + 350 y
@@ -955,7 +955,7 @@ function linear9test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # ranged constraints
-function linear10test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear10test(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
     #   maximize x + y
@@ -1033,7 +1033,7 @@ function linear10test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # changing constraint sense
-function linear11test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear11test(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
     # simple 2 variable, 1 constraint problem
@@ -1078,7 +1078,7 @@ function linear11test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # infeasible problem with 2 linear constraints
-function linear12test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear12test(solver::MOI.AbstractSolver, config::TestConfig, exclude...)
     atol = config.atol
     rtol = config.rtol
     # min x
@@ -1138,13 +1138,4 @@ const contlineartests = Dict("linear1" => linear1test,
                               "linear11" => linear11test,
                               "linear12" => linear12test)
 
-function contlineartest(solver::MOI.AbstractSolver, config::TestConfig, exclude::Vector{String} = String[])
-    for (name,f) in contlineartests
-        if name in exclude
-            continue
-        end
-        @testset "$name" begin
-            f(solver, config)
-        end
-    end
-end
+@moitestset contlinear
