@@ -530,6 +530,8 @@ end
 
 # Change coeffs, del constr, del var
 function linear5test(solver::MOI.AbstractSolver, config::TestConfig)
+    atol = config.atol
+    rtol = config.rtol
     @test MOI.get(solver, MOI.SupportsDeleteVariable())
     #####################################
     # Start from simple LP
