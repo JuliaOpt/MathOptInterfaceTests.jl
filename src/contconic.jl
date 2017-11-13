@@ -1,6 +1,3 @@
-using MathOptInterface
-MOI = MathOptInterface
-
 using MathOptInterfaceUtilities # Defines getindex for VectorAffineFunction
 
 # Continuous conic problems

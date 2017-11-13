@@ -1,6 +1,3 @@
-using MathOptInterface
-MOI = MathOptInterface
-
 using MathOptInterfaceUtilities
 
 function int1test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))

@@ -1,6 +1,3 @@
-using MathOptInterface
-MOI = MathOptInterface
-
 # Integer conic problems
 
 function intsoc1test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
