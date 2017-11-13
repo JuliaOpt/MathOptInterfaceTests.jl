@@ -1146,6 +1146,8 @@ function contlineartest(solver::MOI.AbstractSolver, config::TestConfig, exclude:
         if name in exclude
             continue
         end
-        @testset "$name" f(solver, config)
+        @testset "$name" begin
+            f(solver, config)
+        end
     end
 end
