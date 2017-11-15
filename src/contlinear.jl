@@ -1138,13 +1138,4 @@ const contlineartests = Dict("linear1" => linear1test,
                               "linear11" => linear11test,
                               "linear12" => linear12test)
 
-function contlineartest(solver::MOI.AbstractSolver, config::TestConfig, exclude::Vector{String} = String[])
-    for (name,f) in contlineartests
-        if name in exclude
-            continue
-        end
-        @testset "$name" begin
-            f(solver, config)
-        end
-    end
-end
+@moitestset contlinear
