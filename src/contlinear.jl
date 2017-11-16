@@ -93,7 +93,8 @@ function linear1test(solver::MOI.AbstractSolver, config::TestConfig)
     MOI.set!(instance, MOI.ObjectiveFunction(), objf)
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
 
-    if MOI.canget(instance, MOI.ObjectiveFunction())
+    if config.query
+        @test MOI.canget(instance, MOI.ObjectiveFunction())
         @test objf ≈ MOI.get(instance, MOI.ObjectiveFunction())
     end
 
