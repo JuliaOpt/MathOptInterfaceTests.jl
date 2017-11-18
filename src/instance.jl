@@ -1,6 +1,3 @@
-using MathOptInterface
-MOI = MathOptInterface
-
 # TODO: Move generic instance tests from MOIU to here
 
 function nametest(instance::MOI.AbstractInstance)

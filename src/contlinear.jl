@@ -1,6 +1,3 @@
-using MathOptInterface
-MOI = MathOptInterface
-
 using MathOptInterfaceUtilities # Defines isapprox for ScalarAffineFunction
 
 # Continuous linear problems
@@ -96,7 +93,8 @@ function linear1test(solver::MOI.AbstractSolver, config::TestConfig)
     MOI.set!(instance, MOI.ObjectiveFunction(), objf)
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
 
-    if MOI.canget(instance, MOI.ObjectiveFunction())
+    if config.query
+        @test MOI.canget(instance, MOI.ObjectiveFunction())
         @test objf ≈ MOI.get(instance, MOI.ObjectiveFunction())
     end
 
@@ -530,6 +528,8 @@ end
 
 # Change coeffs, del constr, del var
 function linear5test(solver::MOI.AbstractSolver, config::TestConfig)
+    atol = config.atol
+    rtol = config.rtol
     @test MOI.get(solver, MOI.SupportsDeleteVariable())
     #####################################
     # Start from simple LP
@@ -1139,11 +1139,4 @@ const contlineartests = Dict("linear1" => linear1test,
                               "linear11" => linear11test,
                               "linear12" => linear12test)
 
-function contlineartest(solver::MOI.AbstractSolver, config::TestConfig, exclude::Vector{String} = [])
-    for (name,f) in contlineartests
-        if name in exclude
-            continue
-        end
-        @testset "$name" f(solver, config)
-    end
-end
+@moitestset contlinear

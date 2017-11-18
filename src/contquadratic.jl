@@ -1,6 +1,3 @@
-using MathOptInterface
-MOI = MathOptInterface
-
 using MathOptInterfaceUtilities # Defines isapprox for ScalarQuadraticFunction
 
 # Continuous quadratic problems
