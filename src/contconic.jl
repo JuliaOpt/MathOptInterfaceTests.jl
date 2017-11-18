@@ -45,8 +45,10 @@ function lin1test(solver::MOI.AbstractSolver, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals        
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.ObjectiveValue())
     @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -11 atol=atol rtol=rtol
@@ -93,8 +95,10 @@ function lin1atest(solver::MOI.AbstractSolver, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals 
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.ObjectiveValue())
     @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -11 atol=atol rtol=rtol
@@ -158,8 +162,10 @@ function lin2test(solver::MOI.AbstractSolver, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals 
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.ObjectiveValue())
     @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -82 atol=atol rtol=rtol
@@ -223,8 +229,10 @@ function lin2atest(solver::MOI.AbstractSolver, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals 
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.ObjectiveValue())
     @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -82 atol=atol rtol=rtol
@@ -274,9 +282,10 @@ function lin3test(solver::MOI.AbstractSolver, config::TestConfig)
     if MOI.canget(instance, MOI.PrimalStatus())
         @test MOI.get(instance, MOI.PrimalStatus()) == MOI.InfeasiblePoint
     end
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
-
+    if config.duals && config.infeas_certificates
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
+    end
     # TODO test dual feasibility and objective sign
 end
 
@@ -311,9 +320,10 @@ function lin4test(solver::MOI.AbstractSolver, config::TestConfig)
     if MOI.canget(instance, MOI.PrimalStatus())
         @test MOI.get(instance, MOI.PrimalStatus()) == MOI.InfeasiblePoint
     end
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
-
+    if config.duals && config.infeas_certificates 
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
+    end
     # TODO test dual feasibility and objective sign
 end
 
@@ -359,8 +369,10 @@ function soc1test(solver::MOI.AbstractSolver, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.ObjectiveValue())
     @test MOI.get(instance, MOI.ObjectiveValue()) ≈ sqrt(2) atol=atol rtol=rtol
@@ -410,8 +422,10 @@ function soc1atest(solver::MOI.AbstractSolver, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.ObjectiveValue())
     @test MOI.get(instance, MOI.ObjectiveValue()) ≈ sqrt(2) atol=atol rtol=rtol
@@ -467,8 +481,10 @@ function soc2test(solver::MOI.AbstractSolver, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.ObjectiveValue())
     @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -1/sqrt(2) atol=atol rtol=rtol
@@ -513,8 +529,10 @@ function soc2atest(solver::MOI.AbstractSolver, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.ObjectiveValue())
     @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -1/sqrt(2) atol=atol rtol=rtol
@@ -559,8 +577,10 @@ function soc3test(solver::MOI.AbstractSolver, config::TestConfig)
     @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
     @test !MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
+    if config.duals
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
+    end
 
     # TODO test dual feasibility and objective sign
 end
@@ -611,8 +631,10 @@ function soc4test(solver::MOI.AbstractSolver, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.VariablePrimal(), x)
     x_primal = MOI.get(instance, MOI.VariablePrimal(), x)
@@ -677,8 +699,10 @@ function rotatedsoc1test(solver::MOI.AbstractSolver, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.ObjectiveValue())
     @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -sqrt(2.0) atol=atol rtol=rtol
@@ -738,8 +762,10 @@ function rotatedsoc1atest(solver::MOI.AbstractSolver, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.ObjectiveValue())
     @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -sqrt(2.0) atol=atol rtol=rtol
@@ -877,8 +903,10 @@ function _sdp0test(solver::MOI.AbstractSolver, vecofvars::Bool, sdpcone, config:
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.ObjectiveValue())
     @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 2 atol=atol rtol=rtol
@@ -963,8 +991,10 @@ function _sdp1test(solver::MOI.AbstractSolver, vecofvars::Bool, sdpcone, config:
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.ObjectiveValue())
     @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 0.705710509 atol=atol rtol=rtol
@@ -1064,8 +1094,10 @@ function sdp2test(solver::MOI.AbstractSolver, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    @test MOI.canget(instance, MOI.DualStatus())
-    @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    if config.duals
+        @test MOI.canget(instance, MOI.DualStatus())
+        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    end
 
     @test MOI.canget(instance, MOI.VariablePrimal(), x)
     xv = MOI.get(instance, MOI.VariablePrimal(), x)
