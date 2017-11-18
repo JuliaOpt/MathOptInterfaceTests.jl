@@ -277,8 +277,11 @@ function lin3test(solver::MOI.AbstractSolver, config::TestConfig)
     MOI.optimize!(instance)
 
     @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
-
+    if config.infeas_certificates
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+    else
+        @test MOI.get(instance, MOI.TerminationStatus()) in [MOI.InfeasibleNoResult, MOI.InfeasibleOrUnbounded]
+    end
     if MOI.canget(instance, MOI.PrimalStatus())
         @test MOI.get(instance, MOI.PrimalStatus()) == MOI.InfeasiblePoint
     end
@@ -315,7 +318,11 @@ function lin4test(solver::MOI.AbstractSolver, config::TestConfig)
     MOI.optimize!(instance)
 
     @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+    if config.infeas_certificates
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+    else
+        @test MOI.get(instance, MOI.TerminationStatus()) in [MOI.InfeasibleNoResult, MOI.InfeasibleOrUnbounded]
+    end
 
     if MOI.canget(instance, MOI.PrimalStatus())
         @test MOI.get(instance, MOI.PrimalStatus()) == MOI.InfeasiblePoint
