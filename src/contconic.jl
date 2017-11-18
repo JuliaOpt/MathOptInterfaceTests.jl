@@ -53,8 +53,10 @@ function lin1test(solver::MOI.AbstractSolver, config::TestConfig)
     @test MOI.canget(instance, MOI.VariablePrimal(), v)
     @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 0, 2] atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.ConstraintDual(), c)
-    @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [-3, -1] atol=atol rtol=rtol
+    if config.duals
+        @test MOI.canget(instance, MOI.ConstraintDual(), c)
+        @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [-3, -1] atol=atol rtol=rtol
+    end
 
     # TODO var dual and con primal
 end
@@ -99,8 +101,10 @@ function lin1atest(solver::MOI.AbstractSolver, config::TestConfig)
     @test MOI.canget(instance, MOI.VariablePrimal(), v)
     @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 0, 2] atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.ConstraintDual(), c)
-    @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [-3, -1] atol=atol rtol=rtol
+    if config.duals
+        @test MOI.canget(instance, MOI.ConstraintDual(), c)
+        @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [-3, -1] atol=atol rtol=rtol
+    end
 
     # TODO var dual and con primal
 end
@@ -165,8 +169,10 @@ function lin2test(solver::MOI.AbstractSolver, config::TestConfig)
     @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 16 atol=atol rtol=rtol
     @test MOI.get(instance, MOI.VariablePrimal(), s) ≈ 0 atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.ConstraintDual(), c)
-    @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [7, 2, -4] atol=atol rtol=rtol
+    if config.duals
+        @test MOI.canget(instance, MOI.ConstraintDual(), c)
+        @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [7, 2, -4] atol=atol rtol=rtol
+    end
 
     # TODO var dual and con primal
 end
@@ -228,8 +234,10 @@ function lin2atest(solver::MOI.AbstractSolver, config::TestConfig)
     @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 16 atol=atol rtol=rtol
     @test MOI.get(instance, MOI.VariablePrimal(), s) ≈ 0 atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.ConstraintDual(), c)
-    @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [7, 2, -4] atol=atol rtol=rtol
+    if config.duals
+        @test MOI.canget(instance, MOI.ConstraintDual(), c)
+        @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [7, 2, -4] atol=atol rtol=rtol
+    end
 
     # TODO var dual and con primal
 end
@@ -361,10 +369,12 @@ function soc1test(solver::MOI.AbstractSolver, config::TestConfig)
     @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1/sqrt(2) atol=atol rtol=rtol
     @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 1/sqrt(2) atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.ConstraintDual(), ceq)
-    @test MOI.get(instance, MOI.ConstraintDual(), ceq) ≈ [-sqrt(2)] atol=atol rtol=rtol
-    @test MOI.canget(instance, MOI.ConstraintDual(), csoc)
-    @test MOI.get(instance, MOI.ConstraintDual(), csoc) ≈ [sqrt(2), -1.0, -1.0] atol=atol rtol=rtol
+    if config.duals
+        @test MOI.canget(instance, MOI.ConstraintDual(), ceq)
+        @test MOI.get(instance, MOI.ConstraintDual(), ceq) ≈ [-sqrt(2)] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintDual(), csoc)
+        @test MOI.get(instance, MOI.ConstraintDual(), csoc) ≈ [sqrt(2), -1.0, -1.0] atol=atol rtol=rtol
+    end
 
     # TODO con primal
 end
@@ -410,10 +420,12 @@ function soc1atest(solver::MOI.AbstractSolver, config::TestConfig)
     @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1/sqrt(2) atol=atol rtol=rtol
     @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 1/sqrt(2) atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.ConstraintDual(), ceq)
-    @test MOI.get(instance, MOI.ConstraintDual(), ceq) ≈ [-sqrt(2)] atol=atol rtol=rtol
-    @test MOI.canget(instance, MOI.ConstraintDual(), csoc)
-    @test MOI.get(instance, MOI.ConstraintDual(), csoc) ≈ [sqrt(2), -1.0, -1.0] atol=atol rtol=rtol
+    if config.duals
+        @test MOI.canget(instance, MOI.ConstraintDual(), ceq)
+        @test MOI.get(instance, MOI.ConstraintDual(), ceq) ≈ [-sqrt(2)] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintDual(), csoc)
+        @test MOI.get(instance, MOI.ConstraintDual(), csoc) ≈ [sqrt(2), -1.0, -1.0] atol=atol rtol=rtol
+    end
 
     # TODO con primal
 end
@@ -605,15 +617,17 @@ function soc4test(solver::MOI.AbstractSolver, config::TestConfig)
     x_primal = MOI.get(instance, MOI.VariablePrimal(), x)
     @test x_primal[1]^2 ≥ x_primal[4]^2 + x_primal[5]^2 - atol
 
-    @test MOI.canget(instance, MOI.ConstraintDual(), c2)
-    x_dual = MOI.get(instance, MOI.ConstraintDual(), c2)
-    @test x_dual[1]^2 ≥ x_dual[2]^2 + x_dual[3]^2 - atol
+    if config.duals
+        @test MOI.canget(instance, MOI.ConstraintDual(), c2)
+        x_dual = MOI.get(instance, MOI.ConstraintDual(), c2)
+        @test x_dual[1]^2 ≥ x_dual[2]^2 + x_dual[3]^2 - atol
 
-    @test MOI.canget(instance, MOI.ConstraintDual(), c1)
-    c1_dual = MOI.get(instance, MOI.ConstraintDual(), c1)
+        @test MOI.canget(instance, MOI.ConstraintDual(), c1)
+        c1_dual = MOI.get(instance, MOI.ConstraintDual(), c1)
 
-    @test dot(c,x_primal) ≈ -dot(c1_dual,b) atol=atol rtol=rtol
-    @test (c-A'c1_dual) ≈ [x_dual[1], 0, 0, x_dual[2], x_dual[3]] atol=atol rtol=rtol
+        @test dot(c,x_primal) ≈ -dot(c1_dual,b) atol=atol rtol=rtol
+        @test (c-A'c1_dual) ≈ [x_dual[1], 0, 0, x_dual[2], x_dual[3]] atol=atol rtol=rtol
+    end
 end
 
 const soctests = Dict("soc1"  => soc1test,
