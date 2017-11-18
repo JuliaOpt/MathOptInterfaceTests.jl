@@ -886,11 +886,16 @@ function _sdp0test(solver::MOI.AbstractSolver, vecofvars::Bool, sdpcone, config:
     @test MOI.canget(instance, MOI.VariablePrimal(), X)
     @test MOI.get(instance, MOI.VariablePrimal(), X) ≈ [1, s, 1] atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.ConstraintDual(), c)
-    @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ 2 atol=atol rtol=rtol
+    @test MOI.canget(instance, MOI.ConstraintPrimal(), cX)
+    @test MOI.get(instance, MOI.ConstraintPrimal(), cX) ≈ [1, s, 1] atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.ConstraintDual(), cX)
-    @test MOI.get(instance, MOI.ConstraintDual(), cX) ≈ [1, -s, 1] atol=atol rtol=rtol
+    if config.duals
+        @test MOI.canget(instance, MOI.ConstraintDual(), c)
+        @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ 2 atol=atol rtol=rtol
+
+        @test MOI.canget(instance, MOI.ConstraintDual(), cX)
+        @test MOI.get(instance, MOI.ConstraintDual(), cX) ≈ [1, -s, 1] atol=atol rtol=rtol
+    end
 end
 
 
@@ -969,39 +974,46 @@ function _sdp1test(solver::MOI.AbstractSolver, vecofvars::Bool, sdpcone, config:
     @test MOI.canget(instance, MOI.VariablePrimal(), x)
     xv = MOI.get(instance, MOI.VariablePrimal(), x)
 
-    @test MOI.canget(instance, MOI.ConstraintDual(), c1)
-    y1 = MOI.get(instance, MOI.ConstraintDual(), c1)
-    @test MOI.canget(instance, MOI.ConstraintDual(), c2)
-    y2 = MOI.get(instance, MOI.ConstraintDual(), c2)
+    @test MOI.get(instance, MOI.ConstraintPrimal(), cX) ≈ Xv atol=atol rtol=rtol
+    @test MOI.get(instance, MOI.ConstraintPrimal(), cx) ≈ xv atol=atol rtol=rtol
+    @test MOI.get(instance, MOI.ConstraintPrimal(), c1) ≈ Xv[1]+Xv[3]+Xv[6]+xv[1] atol=atol rtol=rtol
+    @test MOI.get(instance, MOI.ConstraintPrimal(), c2) ≈ Xv[1]+2Xv[2]/s+Xv[3]+2Xv[4]/s+2Xv[5]/s+Xv[6]+xv[2]+xv[3] atol=atol rtol=rtol
 
-    #     X11  X21  X22  X31  X32  X33  x1  x2  x3
-    c = [   2, 2/s,   2,   0, 2/s,   2,  1,  0,  0]
-    b = [1, 1/2]
-    # Check primal objective
-    comp_pobj = dot(c, [Xv; xv])
-    # Check dual objective
-    comp_dobj = dot([y1, y2], b)
-    @test comp_pobj ≈ comp_dobj atol=atol rtol=rtol
+    if config.duals
+        @test MOI.canget(instance, MOI.ConstraintDual(), c1)
+        y1 = MOI.get(instance, MOI.ConstraintDual(), c1)
+        @test MOI.canget(instance, MOI.ConstraintDual(), c2)
+        y2 = MOI.get(instance, MOI.ConstraintDual(), c2)
 
-    @test MOI.canget(instance, MOI.ConstraintDual(), cX)
-    Xdv = MOI.get(instance, MOI.ConstraintDual(), cX)
-    Xd = [Xdv[1]   Xdv[2]/s Xdv[4]/s;
-          Xdv[2]/s Xdv[3]   Xdv[5]/s;
-          Xdv[4]/s Xdv[5]/s Xdv[6]]
+        #     X11  X21  X22  X31  X32  X33  x1  x2  x3
+        c = [   2, 2/s,   2,   0, 2/s,   2,  1,  0,  0]
+        b = [1, 1/2]
+        # Check primal objective
+        comp_pobj = dot(c, [Xv; xv])
+        # Check dual objective
+        comp_dobj = dot([y1, y2], b)
+        @test comp_pobj ≈ comp_dobj atol=atol rtol=rtol
 
-    C = [2 1 0;
-         1 2 1;
-         0 1 2]
-    A1 = [1 0 0;
-          0 1 0;
-          0 0 1]
-    A2 = [1 1 1;
-          1 1 1;
-          1 1 1]
+        @test MOI.canget(instance, MOI.ConstraintDual(), cX)
+        Xdv = MOI.get(instance, MOI.ConstraintDual(), cX)
+        Xd = [Xdv[1]   Xdv[2]/s Xdv[4]/s;
+              Xdv[2]/s Xdv[3]   Xdv[5]/s;
+              Xdv[4]/s Xdv[5]/s Xdv[6]]
 
-    @test C ≈ y1 * A1 + y2 * A2 + Xd atol=atol rtol=rtol
+        C = [2 1 0;
+             1 2 1;
+             0 1 2]
+        A1 = [1 0 0;
+              0 1 0;
+              0 0 1]
+        A2 = [1 1 1;
+              1 1 1;
+              1 1 1]
 
-    @test eigmin(Xd) > -max(atol, rtol)
+        @test C ≈ y1 * A1 + y2 * A2 + Xd atol=atol rtol=rtol
+
+        @test eigmin(Xd) > -max(atol, rtol)
+    end
 end
 
 sdp0tvtest(solver::MOI.AbstractSolver, config::TestConfig) = _sdp0test(solver, true, MOI.PositiveSemidefiniteConeTriangle, config)
