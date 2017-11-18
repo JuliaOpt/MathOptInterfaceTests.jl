@@ -1,4 +1,5 @@
 using MathOptInterfaceUtilities # Defines getindex for VectorAffineFunction
+const MOIU = MathOptInterfaceUtilities
 
 # Continuous conic problems
 
@@ -1032,10 +1033,10 @@ function sdp2test(solver::MOI.AbstractSolver, config::TestConfig)
 
     f = MOI.VectorAffineFunction(I, x[J], V, b)
 
-    c1 = MOI.addconstraint!(instance, f[1], MOI.GreaterThan(0.0))
-    c2 = MOI.addconstraint!(instance, f[2:7], MOI.Nonpositives(6))
-    c3 = MOI.addconstraint!(instance, f[8:10], MOI.PositiveSemidefiniteConeScaled(2))
-    c4 = MOI.addconstraint!(instance, f[11], MOI.EqualTo(0.))
+    c1 = MOI.addconstraint!(instance, MOIU.eachscalar(f)[1], MOI.GreaterThan(0.0))
+    c2 = MOI.addconstraint!(instance, MOIU.eachscalar(f)[2:7], MOI.Nonpositives(6))
+    c3 = MOI.addconstraint!(instance, MOIU.eachscalar(f)[8:10], MOI.PositiveSemidefiniteConeScaled(2))
+    c4 = MOI.addconstraint!(instance, MOIU.eachscalar(f)[11], MOI.EqualTo(0.))
 
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.Nonpositives}()) == 1
