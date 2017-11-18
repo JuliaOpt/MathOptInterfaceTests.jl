@@ -246,7 +246,7 @@ function qcp1test(solver::MOI.AbstractSolver, config::TestConfig)
         y = MOI.addvariable!(instance)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 2
 
-        c1 = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,2,2], [x,y,x,y],[-1.0,1.0,1.0,1.0], [0.0,0.0]), MOI.Nonnegatives(2))
+        c1 = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,2,2], [x,y,x,y], [-1.0,1.0,1.0,1.0], [0.0,0.0]), MOI.Nonnegatives(2))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.Nonnegatives}()) == 1
 
         c2f = MOI.ScalarQuadraticFunction([y],[1.0],[x],[x],[1.0], 0.0)
@@ -443,7 +443,7 @@ function socp1test(solver::MOI.AbstractSolver, config::TestConfig)
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MinSense
 
-        if congi.query
+        if config.query
             @test MOI.canget(instance, MOI.ConstraintFunction(), c1)
             @test c1f ≈ MOI.get(instance, MOI.ConstraintFunction(), c1)
 
@@ -476,13 +476,6 @@ function socptests(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), r
     end
 end
 
-function contquadratictests(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
-    qptests(solver, atol=atol, rtol=rtol)
-    qcptests(solver, atol=atol, rtol=rtol)
-    socptests(solver, atol=atol, rtol=rtol)
-end
-
-
 const contquadratictests = Dict("quadratic1" => qp1test,
                                 "quadratic2" => qp2test,
                                 "quadratic3" => qp3test,
@@ -491,11 +484,4 @@ const contquadratictests = Dict("quadratic1" => qp1test,
                                 "quadratic6" => qcp3test,
                                 "quadratic7" => socp1test)
 
-function contquadratictest(solver::MOI.AbstractSolver, config::TestConfig, exclude::Vector{String} = [])
-    for (name,f) in contquadratictests
-        if name in exclude
-            continue
-        end
-        @testset "$name" f(solver, config)
-    end
-end
+@moitestset contquadratic
