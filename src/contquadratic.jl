@@ -2,7 +2,9 @@ using MathOptInterfaceUtilities # Defines isapprox for ScalarQuadraticFunction
 
 # Continuous quadratic problems
 
-function qp1test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
+function qp1test(solver::MOI.AbstractSolver, config::TestConfig)
+    atol = config.atol
+    rtol = config.rtol
     @testset "QP1 - Quadratic objective" begin
         # simple quadratic objective
         # Min x^2 + xy + y^2 + yz + z^2
@@ -29,15 +31,14 @@ function qp1test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rto
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MinSense
 
-        if MOI.canget(instance, MOI.ObjectiveFunction())
+        if config.query
+            @test MOI.canget(instance, MOI.ObjectiveFunction())
             @test obj ≈ MOI.get(instance, MOI.ObjectiveFunction())
-        end
 
-        if MOI.canget(instance, MOI.ConstraintFunction(), c1)
+            @test MOI.canget(instance, MOI.ConstraintFunction(), c1)
             @test cf1 ≈ MOI.get(instance, MOI.ConstraintFunction(), c1)
-        end
 
-        if MOI.canget(instance, MOI.ConstraintSet(), c1)
+            @test MOI.canget(instance, MOI.ConstraintSet(), c1)
             @test MOI.GreaterThan(4.0) == MOI.get(instance, MOI.ConstraintSet(), c1)
         end
 
@@ -57,7 +58,9 @@ function qp1test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rto
     end
 end
 
-function qp2test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
+function qp2test(solver::MOI.AbstractSolver, config::TestConfig)
+    atol = config.atol
+    rtol = config.rtol
     @testset "QP2" begin
         # same as QP0 but with duplicate terms
         # then change the objective and sense
@@ -86,15 +89,14 @@ function qp2test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rto
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MinSense
 
-        if MOI.canget(instance, MOI.ObjectiveFunction())
+        if config.query           
+            @test MOI.canget(instance, MOI.ObjectiveFunction())
             @test obj ≈ MOI.get(instance, MOI.ObjectiveFunction())
-        end
 
-        if MOI.canget(instance, MOI.ConstraintFunction(), c1)
+            @test MOI.canget(instance, MOI.ConstraintFunction(), c1)
             @test c1f ≈ MOI.get(instance, MOI.ConstraintFunction(), c1)
-        end
 
-        if MOI.canget(instance, MOI.ConstraintSet(), c1)
+            @test MOI.canget(instance, MOI.ConstraintSet(), c1)
             @test MOI.GreaterThan(4.0) == MOI.get(instance, MOI.ConstraintSet(), c1)
         end
 
@@ -118,7 +120,8 @@ function qp2test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rto
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
 
-        if MOI.canget(instance, MOI.ObjectiveFunction())
+        if config.query
+            @test MOI.canget(instance, MOI.ObjectiveFunction())
             @test obj2 ≈ MOI.get(instance, MOI.ObjectiveFunction())
         end
 
@@ -138,7 +141,9 @@ function qp2test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rto
     end
 end
 
-function qp3test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
+function qp3test(solver::MOI.AbstractSolver, config::TestConfig)
+    atol = config.atol
+    rtol = config.rtol
     @testset "qp3test - Linear Quadratic objective" begin
         # simple quadratic objective
         #    minimize 2 x^2 + y^2 + xy + x + y + 1
@@ -223,7 +228,9 @@ end
     Quadratically constrained programs
 =#
 
-function qcp1test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
+function qcp1test(solver::MOI.AbstractSolver, config::TestConfig)
+    atol = config.atol
+    rtol = config.rtol
     @testset "qcp1" begin
         # quadratic constraint
         # Max x + y
@@ -239,7 +246,7 @@ function qcp1test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rt
         y = MOI.addvariable!(instance)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 2
 
-        c1 = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,2,2], [x,y,x,y],[-1.0,1.0,1.0,1.0], [0.0,0.0]), MOI.Nonnegatives(2))
+        c1 = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,2,2], [x,y,x,y], [-1.0,1.0,1.0,1.0], [0.0,0.0]), MOI.Nonnegatives(2))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.Nonnegatives}()) == 1
 
         c2f = MOI.ScalarQuadraticFunction([y],[1.0],[x],[x],[1.0], 0.0)
@@ -250,7 +257,8 @@ function qcp1test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rt
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
 
-        if MOI.canget(instance, MOI.ConstraintFunction(), c2)
+        if config.query
+            @test MOI.canget(instance, MOI.ConstraintFunction(), c2)
             @test c2f ≈ MOI.get(instance, MOI.ConstraintFunction(), c2)
         end
 
@@ -286,7 +294,9 @@ function qcp1test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rt
 end
 
 
-function qcp2test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
+function qcp2test(solver::MOI.AbstractSolver, config::TestConfig)
+    atol = config.atol
+    rtol = config.rtol
     @testset "qcp2" begin
         # Max x
         # s.t. x^2 <= 2 (c)
@@ -306,7 +316,8 @@ function qcp2test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rt
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
 
-        if MOI.canget(instance, MOI.ConstraintFunction(), c)
+        if config.query
+            @test MOI.canget(instance, MOI.ConstraintFunction(), c)
             @test cf ≈ MOI.get(instance, MOI.ConstraintFunction(), c)
         end
 
@@ -318,8 +329,10 @@ function qcp2test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rt
         @test MOI.canget(instance, MOI.PrimalStatus())
         @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
 
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
 
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ sqrt(2) atol=atol rtol=rtol
@@ -333,7 +346,9 @@ function qcp2test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rt
     end
 end
 
-function qcp3test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
+function qcp3test(solver::MOI.AbstractSolver, config::TestConfig)
+    atol = config.atol
+    rtol = config.rtol
     @testset "qcp3" begin
         # Min -x
         # s.t. x^2 <= 2
@@ -353,7 +368,8 @@ function qcp3test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rt
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MinSense
 
-        if MOI.canget(instance, MOI.ConstraintFunction(), c)
+        if config.query
+            @test MOI.canget(instance, MOI.ConstraintFunction(), c)
             @test cf ≈ MOI.get(instance, MOI.ConstraintFunction(), c)
         end
 
@@ -365,8 +381,10 @@ function qcp3test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rt
         @test MOI.canget(instance, MOI.PrimalStatus())
         @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
 
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
 
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -sqrt(2) atol=atol rtol=rtol
@@ -392,7 +410,9 @@ end
     SOCP
 =#
 
-function socp1test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
+function socp1test(solver::MOI.AbstractSolver, config::TestConfig)
+    atol = config.atol
+    rtol = config.rtol
     @testset "socp1" begin
         # min t
         # s.t. x + y >= 1 (c1)
@@ -423,11 +443,11 @@ function socp1test(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), r
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MinSense
 
-        if MOI.canget(instance, MOI.ConstraintFunction(), c1)
+        if config.query
+            @test MOI.canget(instance, MOI.ConstraintFunction(), c1)
             @test c1f ≈ MOI.get(instance, MOI.ConstraintFunction(), c1)
-        end
 
-        if MOI.canget(instance, MOI.ConstraintFunction(), c2)
+            @test MOI.canget(instance, MOI.ConstraintFunction(), c2)
             @test c2f ≈ MOI.get(instance, MOI.ConstraintFunction(), c2)
         end
 
@@ -456,8 +476,12 @@ function socptests(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), r
     end
 end
 
-function contquadratictests(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
-    qptests(solver, atol=atol, rtol=rtol)
-    qcptests(solver, atol=atol, rtol=rtol)
-    socptests(solver, atol=atol, rtol=rtol)
-end
+const contquadratictests = Dict("quadratic1" => qp1test,
+                                "quadratic2" => qp2test,
+                                "quadratic3" => qp3test,
+                                "quadratic4" => qcp1test,
+                                "quadratic5" => qcp2test,
+                                "quadratic6" => qcp3test,
+                                "quadratic7" => socp1test)
+
+@moitestset contquadratic
