@@ -3,17 +3,17 @@ const MOIU = MathOptInterfaceUtilities
 
 # Continuous conic problems
 
-function lin1test(solver::MOI.AbstractSolver, config::TestConfig)
+function lin1test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver,
-        MOI.ScalarAffineFunction{Float64},
-        [
-            (MOI.VectorOfVariables,MOI.Nonnegatives),
-            (MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),
-            (MOI.VectorAffineFunction{Float64},MOI.Zeros)
-        ]
-    )
+    #@test MOI.supportsproblem(solver,
+    #    MOI.ScalarAffineFunction{Float64},
+    #    [
+    #        (MOI.VectorOfVariables,MOI.Nonnegatives),
+    #        (MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),
+    #        (MOI.VectorAffineFunction{Float64},MOI.Zeros)
+    #    ]
+    #)
     # linear conic problem
     # min -3x - 2y - 4z
     # st    x +  y +  z == 3
@@ -21,7 +21,7 @@ function lin1test(solver::MOI.AbstractSolver, config::TestConfig)
     #       x>=0 y>=0 z>=0
     # Opt obj = -11, soln x = 1, y = 0, z = 2
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     v = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
@@ -64,18 +64,18 @@ function lin1test(solver::MOI.AbstractSolver, config::TestConfig)
     # TODO var dual and con primal
 end
 
-function lin1atest(solver::MOI.AbstractSolver, config::TestConfig)
+function lin1atest(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
-    [
-        (MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),
-        (MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),
-        (MOI.VectorAffineFunction{Float64},MOI.Zeros)
-    ])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
+    #[
+    #    (MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),
+    #    (MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),
+    #    (MOI.VectorAffineFunction{Float64},MOI.Zeros)
+    #])
     # Same as LIN1 but variable bounds enforced with VectorAffineFunction
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     v = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
@@ -114,15 +114,15 @@ function lin1atest(solver::MOI.AbstractSolver, config::TestConfig)
     # TODO var dual and con primal
 end
 
-function lin2test(solver::MOI.AbstractSolver, config::TestConfig)
+function lin2test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
-    [
-        (MOI.VectorAffineFunction{Float64},MOI.Zeros),
-        (MOI.VectorOfVariables,MOI.Nonnegatives),
-        (MOI.VectorOfVariables,MOI.Nonpositives)
-    ])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
+    #[
+    #    (MOI.VectorAffineFunction{Float64},MOI.Zeros),
+    #    (MOI.VectorOfVariables,MOI.Nonnegatives),
+    #    (MOI.VectorOfVariables,MOI.Nonpositives)
+    #])
     # mixed cones
     # min  3x + 2y - 4z + 0s
     # st    x           -  s  == -4    (i.e. x >= -4)
@@ -136,7 +136,7 @@ function lin2test(solver::MOI.AbstractSolver, config::TestConfig)
     # x = -4, y = -3, z = 16, s == 0
 
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x,y,z,s = MOI.addvariables!(instance, 4)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 4
@@ -184,10 +184,10 @@ function lin2test(solver::MOI.AbstractSolver, config::TestConfig)
     # TODO var dual and con primal
 end
 
-function lin2atest(solver::MOI.AbstractSolver, config::TestConfig)
+function lin2atest(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Zeros),(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),(MOI.VectorAffineFunction{Float64},MOI.Nonpositives)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Zeros),(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),(MOI.VectorAffineFunction{Float64},MOI.Nonpositives)])
     # mixed cones
     # same as LIN2 but with variable bounds enforced with VectorAffineFunction
     # min  3x + 2y - 4z + 0s
@@ -201,7 +201,7 @@ function lin2atest(solver::MOI.AbstractSolver, config::TestConfig)
     # Opt solution = -82
     # x = -4, y = -3, z = 16, s == 0
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x,y,z,s = MOI.addvariables!(instance, 4)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 4
@@ -251,10 +251,10 @@ function lin2atest(solver::MOI.AbstractSolver, config::TestConfig)
     # TODO var dual and con primal
 end
 
-function lin3test(solver::MOI.AbstractSolver, config::TestConfig)
+function lin3test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Nonpositives),(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Nonpositives),(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives)])
     # Problem LIN3 - Infeasible LP
     # min  0
     # s.t. x ≥ 1
@@ -264,7 +264,7 @@ function lin3test(solver::MOI.AbstractSolver, config::TestConfig)
     # s.t. -1 + x ∈ R₊
     #       1 + x ∈ R₋
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariable!(instance)
 
@@ -292,10 +292,10 @@ function lin3test(solver::MOI.AbstractSolver, config::TestConfig)
     # TODO test dual feasibility and objective sign
 end
 
-function lin4test(solver::MOI.AbstractSolver, config::TestConfig)
+function lin4test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),(MOI.VectorOfVariables,MOI.Nonpositives)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),(MOI.VectorOfVariables,MOI.Nonpositives)])
     # Problem LIN4 - Infeasible LP
     # min  0
     # s.t. x ≥ 1
@@ -305,7 +305,7 @@ function lin4test(solver::MOI.AbstractSolver, config::TestConfig)
     # s.t. -1 + x ∈ R₊
     #           x ∈ R₋
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariable!(instance)
 
@@ -343,16 +343,16 @@ const lintests = Dict("lin1"  => lin1test,
 
 @moitestset lin
 
-function soc1test(solver::MOI.AbstractSolver, config::TestConfig)
+function soc1test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Zeros),(MOI.VectorOfVariables,MOI.SecondOrderCone)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Zeros),(MOI.VectorOfVariables,MOI.SecondOrderCone)])
     # Problem SOC1
     # max 0x + 1y + 1z
     #  st  x            == 1
     #      x >= ||(y,z)||
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x,y,z = MOI.addvariables!(instance, 3)
 
@@ -399,17 +399,17 @@ function soc1test(solver::MOI.AbstractSolver, config::TestConfig)
     # TODO con primal
 end
 
-function soc1atest(solver::MOI.AbstractSolver, config::TestConfig)
+function soc1atest(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Zeros),(MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Zeros),(MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone)])
     # Problem SOC1A
     # max 0x + 1y + 1z
     #  st  x            == 1
     #      x >= ||(y,z)||
     # same as SOC1 but with soc constraint enforced with VectorAffineFunction
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x,y,z = MOI.addvariables!(instance, 3)
 
@@ -452,10 +452,10 @@ function soc1atest(solver::MOI.AbstractSolver, config::TestConfig)
     # TODO con primal
 end
 
-function soc2test(solver::MOI.AbstractSolver, config::TestConfig)
+function soc2test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Zeros),(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),(MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Zeros),(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),(MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone)])
     # Problem SOC2
     # min  x
     # s.t. y ≥ 1/√2
@@ -466,7 +466,7 @@ function soc2test(solver::MOI.AbstractSolver, config::TestConfig)
     #        1 - t ∈ {0}
     #      (t,x,y) ∈ SOC₃
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x,y,t = MOI.addvariables!(instance, 3)
 
@@ -503,10 +503,10 @@ function soc2test(solver::MOI.AbstractSolver, config::TestConfig)
     # TODO constraint primal and duals
 end
 
-function soc2atest(solver::MOI.AbstractSolver, config::TestConfig)
+function soc2atest(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Zeros),(MOI.VectorAffineFunction{Float64},MOI.Nonpositives),(MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Zeros),(MOI.VectorAffineFunction{Float64},MOI.Nonpositives),(MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone)])
     # Problem SOC2A
     # Same as SOC2 but with nonpositive instead of nonnegative
     # min  x
@@ -514,7 +514,7 @@ function soc2atest(solver::MOI.AbstractSolver, config::TestConfig)
     #        1 - t ∈ {0}
     #      (t,x,y) ∈ SOC₃
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x,y,t = MOI.addvariables!(instance, 3)
 
@@ -551,10 +551,10 @@ function soc2atest(solver::MOI.AbstractSolver, config::TestConfig)
     # TODO constraint primal and duals
 end
 
-function soc3test(solver::MOI.AbstractSolver, config::TestConfig)
+function soc3test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),(MOI.VectorAffineFunction{Float64},MOI.Nonpositives),(MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),(MOI.VectorAffineFunction{Float64},MOI.Nonpositives),(MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone)])
     # Problem SOC3 - Infeasible
     # min 0
     # s.t. y ≥ 2
@@ -566,7 +566,7 @@ function soc3test(solver::MOI.AbstractSolver, config::TestConfig)
     #      -1 + x ∈ R₋
     #       (x,y) ∈ SOC₂
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x,y = MOI.addvariables!(instance, 2)
 
@@ -592,10 +592,10 @@ function soc3test(solver::MOI.AbstractSolver, config::TestConfig)
     # TODO test dual feasibility and objective sign
 end
 
-function soc4test(solver::MOI.AbstractSolver, config::TestConfig)
+function soc4test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.Zeros),(MOI.VectorOfVariables,MOI.SecondOrderCone)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.Zeros),(MOI.VectorOfVariables,MOI.SecondOrderCone)])
     # Problem SOC4
     # min 0x[1] - 2x[2] - 1x[3]
     #  st  x[1]                                == 1 (c1a)
@@ -615,7 +615,7 @@ function soc4test(solver::MOI.AbstractSolver, config::TestConfig)
           0.0  0.0  1.0  0.0 -1.0]
     c = [ 0.0,-2.0,-1.0, 0.0, 0.0]
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariables!(instance, 5)
 
@@ -669,12 +669,12 @@ const soctests = Dict("soc1"  => soc1test,
 
 @moitestset soc
 
-function rotatedsoc1test(solver::MOI.AbstractSolver, config::TestConfig)
+function rotatedsoc1test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
-        [(MOI.SingleVariable,MOI.EqualTo{Float64}),
-         (MOI.VectorOfVariables,MOI.RotatedSecondOrderCone)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
+    #    [(MOI.SingleVariable,MOI.EqualTo{Float64}),
+    #     (MOI.VectorOfVariables,MOI.RotatedSecondOrderCone)])
     # Problem SOCRotated1
     # min 0a + 0b - 1x - 1y
     #  st  a            == 1/2
@@ -685,7 +685,7 @@ function rotatedsoc1test(solver::MOI.AbstractSolver, config::TestConfig)
           0.0  1.0   0.0   0.0]
     b = [ 0.5, 1.0]
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariables!(instance, 4)
 
@@ -740,11 +740,11 @@ function rotatedsoc1test(solver::MOI.AbstractSolver, config::TestConfig)
     end
 end
 
-function rotatedsoc1atest(solver::MOI.AbstractSolver, config::TestConfig)
+function rotatedsoc1atest(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
-        [(MOI.VectorAffineFunction{Float64},MOI.RotatedSecondOrderCone)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
+    #    [(MOI.VectorAffineFunction{Float64},MOI.RotatedSecondOrderCone)])
     # Problem SOCRotated1A - Problem SOCRotated1 with a and b substituted
     # min          -y - z
     #  st [0.5] - [      ] SOCRotated
@@ -753,7 +753,7 @@ function rotatedsoc1atest(solver::MOI.AbstractSolver, config::TestConfig)
     #     [0.0] - [    -z] SOCRotated
     b = [0.5, 1.0, 0.0, 0.0]
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariables!(instance, 2)
 
@@ -796,14 +796,14 @@ function rotatedsoc1atest(solver::MOI.AbstractSolver, config::TestConfig)
     end
 end
 
-function rotatedsoc2test(solver::MOI.AbstractSolver, config::TestConfig)
+function rotatedsoc2test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
-        [(MOI.SingleVariable,MOI.EqualTo{Float64}),
-         (MOI.SingleVariable,MOI.LessThan{Float64}),
-         (MOI.SingleVariable,MOI.GreaterThan{Float64}),
-         (MOI.VectorOfVariables,MOI.RotatedSecondOrderCone)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
+    #    [(MOI.SingleVariable,MOI.EqualTo{Float64}),
+    #     (MOI.SingleVariable,MOI.LessThan{Float64}),
+    #     (MOI.SingleVariable,MOI.GreaterThan{Float64}),
+    #     (MOI.VectorOfVariables,MOI.RotatedSecondOrderCone)])
     # Problem SOCRotated2 - Infeasible
     # min 0
     # s.t.
@@ -821,7 +821,7 @@ function rotatedsoc2test(solver::MOI.AbstractSolver, config::TestConfig)
     b = [-2, -1, 1/2]
     c = [0.0,0.0,0.0]
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariables!(instance, 3)
 
@@ -874,18 +874,18 @@ const rsoctests = Dict("rotatedsoc1"  => rotatedsoc1test,
 
 @moitestset rsoc
 
-function _sdp0test(solver::MOI.AbstractSolver, vecofvars::Bool, sdpcone, config::TestConfig)
+function _sdp0test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     scaled = sdpcone == MOI.PositiveSemidefiniteConeScaled
     s = scaled ? sqrt(2) : 1
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}), (MOI.VectorOfVariables, sdpcone)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}), (MOI.VectorOfVariables, sdpcone)])
     # min X[1,1] + X[2,2]    max y
     #     X[2,1] = 1         [0   y/2     [ 1  0
     #                         y/2 0    <=   0  1]
     #     X >= 0              y free
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     X = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
@@ -934,12 +934,12 @@ function _sdp0test(solver::MOI.AbstractSolver, vecofvars::Bool, sdpcone, config:
 end
 
 
-function _sdp1test(solver::MOI.AbstractSolver, vecofvars::Bool, sdpcone, config::TestConfig)
+function _sdp1test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     scaled = sdpcone == MOI.PositiveSemidefiniteConeScaled
     s = scaled ? sqrt(2) : 1.
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}), (MOI.VectorOfVariables, sdpcone), (MOI.VectorOfVariables, MOI.SecondOrderCone)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}), (MOI.VectorOfVariables, sdpcone), (MOI.VectorOfVariables, MOI.SecondOrderCone)])
     # Problem SDP1 - sdo1 from MOSEK docs
     # From Mosek.jl/test/mathprogtestextra.jl, under license:
     #   Copyright (c) 2013 Ulf Worsoe, Mosek ApS
@@ -967,7 +967,7 @@ function _sdp1test(solver::MOI.AbstractSolver, vecofvars::Bool, sdpcone, config:
     #      (x1,x2,x3) in C^3_q
     #      X in C_sdp
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     X = MOI.addvariables!(instance, 6)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 6
@@ -1053,21 +1053,21 @@ function _sdp1test(solver::MOI.AbstractSolver, vecofvars::Bool, sdpcone, config:
     end
 end
 
-sdp0tvtest(solver::MOI.AbstractSolver, config::TestConfig) = _sdp0test(solver, true, MOI.PositiveSemidefiniteConeTriangle, config)
-sdp0tftest(solver::MOI.AbstractSolver, config::TestConfig) = _sdp0test(solver, false, MOI.PositiveSemidefiniteConeTriangle, config)
-sdp0svtest(solver::MOI.AbstractSolver, config::TestConfig) = _sdp0test(solver, true, MOI.PositiveSemidefiniteConeScaled, config)
-sdp0sftest(solver::MOI.AbstractSolver, config::TestConfig) = _sdp0test(solver, false, MOI.PositiveSemidefiniteConeScaled, config)
-sdp1tvtest(solver::MOI.AbstractSolver, config::TestConfig) = _sdp1test(solver, true, MOI.PositiveSemidefiniteConeTriangle, config)
-sdp1tftest(solver::MOI.AbstractSolver, config::TestConfig) = _sdp1test(solver, false, MOI.PositiveSemidefiniteConeTriangle, config)
-sdp1svtest(solver::MOI.AbstractSolver, config::TestConfig) = _sdp1test(solver, true, MOI.PositiveSemidefiniteConeScaled, config)
-sdp1sftest(solver::MOI.AbstractSolver, config::TestConfig) = _sdp1test(solver, false, MOI.PositiveSemidefiniteConeScaled, config)
+sdp0tvtest(solver::Function, config::TestConfig) = _sdp0test(solver, true, MOI.PositiveSemidefiniteConeTriangle, config)
+sdp0tftest(solver::Function, config::TestConfig) = _sdp0test(solver, false, MOI.PositiveSemidefiniteConeTriangle, config)
+sdp0svtest(solver::Function, config::TestConfig) = _sdp0test(solver, true, MOI.PositiveSemidefiniteConeScaled, config)
+sdp0sftest(solver::Function, config::TestConfig) = _sdp0test(solver, false, MOI.PositiveSemidefiniteConeScaled, config)
+sdp1tvtest(solver::Function, config::TestConfig) = _sdp1test(solver, true, MOI.PositiveSemidefiniteConeTriangle, config)
+sdp1tftest(solver::Function, config::TestConfig) = _sdp1test(solver, false, MOI.PositiveSemidefiniteConeTriangle, config)
+sdp1svtest(solver::Function, config::TestConfig) = _sdp1test(solver, true, MOI.PositiveSemidefiniteConeScaled, config)
+sdp1sftest(solver::Function, config::TestConfig) = _sdp1test(solver, false, MOI.PositiveSemidefiniteConeScaled, config)
 
-function sdp2test(solver::MOI.AbstractSolver, config::TestConfig)
+function sdp2test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}), (MOI.VectorOfVariables, MOI.PositiveSemidefiniteConeScaled)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}), (MOI.VectorOfVariables, MOI.PositiveSemidefiniteConeScaled)])
     # Caused getdual to fail on SCS and Mosek
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariables!(instance, 7)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 7

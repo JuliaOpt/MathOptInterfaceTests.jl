@@ -2,7 +2,7 @@ using MathOptInterfaceUtilities # Defines isapprox for ScalarQuadraticFunction
 
 # Continuous quadratic problems
 
-function qp1test(solver::MOI.AbstractSolver, config::TestConfig)
+function qp1test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     @testset "QP1 - Quadratic objective" begin
@@ -12,9 +12,9 @@ function qp1test(solver::MOI.AbstractSolver, config::TestConfig)
         #     x +  y      >= 1 (c2)
         #     x,y \in R
 
-        @test MOI.supportsproblem(solver, MOI.ScalarQuadraticFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64})])
+        #@test MOI.supportsproblem(solver, MOI.ScalarQuadraticFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64})])
 
-        instance = MOI.SolverInstance(solver)
+        instance = solver()
 
         v = MOI.addvariables!(instance, 3)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 3
@@ -58,7 +58,7 @@ function qp1test(solver::MOI.AbstractSolver, config::TestConfig)
     end
 end
 
-function qp2test(solver::MOI.AbstractSolver, config::TestConfig)
+function qp2test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     @testset "QP2" begin
@@ -70,9 +70,9 @@ function qp2test(solver::MOI.AbstractSolver, config::TestConfig)
         #     x +  y      >= 1 (c2)
         #     x,y \in R
 
-        @test MOI.supportsproblem(solver, MOI.ScalarQuadraticFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64})])
+        #@test MOI.supportsproblem(solver, MOI.ScalarQuadraticFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64})])
 
-        instance = MOI.SolverInstance(solver)
+        instance = solver()
 
         v = MOI.addvariables!(instance, 3)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 3
@@ -141,7 +141,7 @@ function qp2test(solver::MOI.AbstractSolver, config::TestConfig)
     end
 end
 
-function qp3test(solver::MOI.AbstractSolver, config::TestConfig)
+function qp3test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     @testset "qp3test - Linear Quadratic objective" begin
@@ -150,14 +150,14 @@ function qp3test(solver::MOI.AbstractSolver, config::TestConfig)
         #       s.t.  x, y >= 0
         #             x + y = 1
 
-        @test MOI.supportsproblem(solver, MOI.ScalarQuadraticFunction{Float64},
-            [
-                (MOI.SingleVariable,MOI.GreaterThan{Float64}),
-                (MOI.ScalarAffineFunction{Float64},MOI.EqualTo{Float64})
-            ]
-        )
+        #@test MOI.supportsproblem(solver, MOI.ScalarQuadraticFunction{Float64},
+        #    [
+        #        (MOI.SingleVariable,MOI.GreaterThan{Float64}),
+        #        (MOI.ScalarAffineFunction{Float64},MOI.EqualTo{Float64})
+        #    ]
+        #)
 
-        instance = MOI.SolverInstance(solver)
+        instance = solver()
         x = MOI.addvariable!(instance)
         y = MOI.addvariable!(instance)
 
@@ -216,7 +216,7 @@ function qp3test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 
-function qptests(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
+function qptests(solver::Function; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
     @testset "Quadratic Programs (quad. objective)" begin
         qp1test(solver, atol=atol, rtol=rtol)
         qp2test(solver, atol=atol, rtol=rtol)
@@ -228,7 +228,7 @@ end
     Quadratically constrained programs
 =#
 
-function qcp1test(solver::MOI.AbstractSolver, config::TestConfig)
+function qcp1test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     @testset "qcp1" begin
@@ -238,9 +238,9 @@ function qcp1test(solver::MOI.AbstractSolver, config::TestConfig)
         #       x + y >= 0 (c1[2])
         #     0.5x^2 + y <= 2 (c2)
 
-        @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),(MOI.ScalarQuadraticFunction{Float64},MOI.LessThan{Float64})])
+        #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),(MOI.ScalarQuadraticFunction{Float64},MOI.LessThan{Float64})])
 
-        instance = MOI.SolverInstance(solver)
+        instance = solver()
 
         x = MOI.addvariable!(instance)
         y = MOI.addvariable!(instance)
@@ -294,16 +294,16 @@ function qcp1test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 
-function qcp2test(solver::MOI.AbstractSolver, config::TestConfig)
+function qcp2test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     @testset "qcp2" begin
         # Max x
         # s.t. x^2 <= 2 (c)
 
-        @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarQuadraticFunction{Float64},MOI.LessThan{Float64})])
+        #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarQuadraticFunction{Float64},MOI.LessThan{Float64})])
 
-        instance = MOI.SolverInstance(solver)
+        instance = solver()
 
         x = MOI.addvariable!(instance)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 1
@@ -346,16 +346,16 @@ function qcp2test(solver::MOI.AbstractSolver, config::TestConfig)
     end
 end
 
-function qcp3test(solver::MOI.AbstractSolver, config::TestConfig)
+function qcp3test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     @testset "qcp3" begin
         # Min -x
         # s.t. x^2 <= 2
 
-        @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarQuadraticFunction{Float64},MOI.LessThan{Float64})])
+        #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarQuadraticFunction{Float64},MOI.LessThan{Float64})])
 
-        instance = MOI.SolverInstance(solver)
+        instance = solver()
 
         x = MOI.addvariable!(instance)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 1
@@ -398,7 +398,7 @@ function qcp3test(solver::MOI.AbstractSolver, config::TestConfig)
     end
 end
 
-function qcptests(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
+function qcptests(solver::Function; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
     @testset "Quadratic Constrainted Programs (quad. constraints only)" begin
         qcp1test(solver, atol=atol, rtol=rtol)
         qcp2test(solver, atol=atol, rtol=rtol)
@@ -410,7 +410,7 @@ end
     SOCP
 =#
 
-function socp1test(solver::MOI.AbstractSolver, config::TestConfig)
+function socp1test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     @testset "socp1" begin
@@ -419,9 +419,9 @@ function socp1test(solver::MOI.AbstractSolver, config::TestConfig)
         #      x^2 + y^2 <= t^2 (c2)
         #      t >= 0 (bound)
 
-        @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarQuadraticFunction{Float64},MOI.LessThan{Float64}), (MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}), (MOI.SingleVariable,MOI.GreaterThan{Float64})])
+        #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarQuadraticFunction{Float64},MOI.LessThan{Float64}), (MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}), (MOI.SingleVariable,MOI.GreaterThan{Float64})])
 
-        instance = MOI.SolverInstance(solver)
+        instance = solver()
 
         x = MOI.addvariable!(instance)
         y = MOI.addvariable!(instance)
@@ -470,7 +470,7 @@ function socp1test(solver::MOI.AbstractSolver, config::TestConfig)
     end
 end
 
-function socptests(solver::MOI.AbstractSolver; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
+function socptests(solver::Function; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
     @testset "Second Order Cone Programs" begin
         socp1test(solver, atol=atol, rtol=rtol)
     end

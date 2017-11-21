@@ -23,7 +23,7 @@ macro moitestset(setname, subsets=false)
         runtest = :( f(solver, config) )
     end
     :(
-        function $testname(solver::MOI.AbstractSolver, config::TestConfig, exclude::Vector{String} = String[])
+        function $testname(solver::Function, config::TestConfig, exclude::Vector{String} = String[])
             for (name,f) in $testdict
                 if name in exclude
                     continue

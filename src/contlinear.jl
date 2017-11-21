@@ -3,7 +3,7 @@ using MathOptInterfaceUtilities # Defines isapprox for ScalarAffineFunction
 # Continuous linear problems
 
 # Basic solver, query, resolve
-function linear1test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear1test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     # simple 2 variable, 1 constraint problem
@@ -11,13 +11,13 @@ function linear1test(solver::MOI.AbstractSolver, config::TestConfig)
     # st   x + y <= 1   (x + y - 1 ∈ Nonpositives)
     #       x, y >= 0   (x, y ∈ Nonnegatives)
 
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64})])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64})])
 
-    @test MOI.get(solver, MOI.SupportsAddConstraintAfterSolve())
-    @test MOI.get(solver, MOI.SupportsAddVariableAfterSolve())
-    @test MOI.get(solver, MOI.SupportsDeleteConstraint())
+    #@test MOI.get(solver, MOI.SupportsAddConstraintAfterSolve())
+    #@test MOI.get(solver, MOI.SupportsAddVariableAfterSolve())
+    #@test MOI.get(solver, MOI.SupportsDeleteConstraint())
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     v = MOI.addvariables!(instance, 2)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 2
@@ -331,16 +331,16 @@ function linear1test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # addvariable! (one by one)
-function linear2test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear2test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     # Min -x
     # s.t. x + y <= 1
     # x, y >= 0
 
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64})])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64})])
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
@@ -396,14 +396,14 @@ function linear2test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # Issue #40 from Gurobi.jl
-function linear3test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear3test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     # min  x
     # s.t. x >= 0
     #      x >= 3
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariable!(instance)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 1
@@ -437,7 +437,7 @@ function linear3test(solver::MOI.AbstractSolver, config::TestConfig)
     # s.t. x <= 0
     #      x <= 3
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariable!(instance)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 1
@@ -469,13 +469,13 @@ function linear3test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # Modify GreaterThan and LessThan sets as bounds
-function linear4test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear4test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
 
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.SingleVariable,MOI.GreaterThan{Float64}),(MOI.SingleVariable,MOI.LessThan{Float64})])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.SingleVariable,MOI.GreaterThan{Float64}),(MOI.SingleVariable,MOI.LessThan{Float64})])
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
@@ -527,10 +527,10 @@ function linear4test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # Change coeffs, del constr, del var
-function linear5test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear5test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.get(solver, MOI.SupportsDeleteVariable())
+    #@test MOI.get(solver, MOI.SupportsDeleteVariable())
     #####################################
     # Start from simple LP
     # Solve it
@@ -547,7 +547,7 @@ function linear5test(solver::MOI.AbstractSolver, config::TestConfig)
     #
     #   solution: x = 1.3333333, y = 1.3333333, objv = 2.66666666
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
@@ -663,13 +663,13 @@ function linear5test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # Modify GreaterThan and LessThan sets as linear constraints
-function linear6test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear6test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
 
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}),(MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64})])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}),(MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64})])
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
@@ -721,13 +721,13 @@ function linear6test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # Modify constants in Nonnegatives and Nonpositives
-function linear7test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear7test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
 
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Nonpositives),(MOI.VectorAffineFunction{Float64},MOI.Nonpositives)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Nonpositives),(MOI.VectorAffineFunction{Float64},MOI.Nonpositives)])
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
@@ -779,15 +779,15 @@ function linear7test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # infeasible problem
-function linear8atest(solver::MOI.AbstractSolver, config::TestConfig)
+function linear8atest(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     # min x
     # s.t. 2x+y <= -1
     # x,y >= 0
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64})])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64})])
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
     c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x,y], [2.0,1.0], 0.0), MOI.LessThan(-1.0))
@@ -823,15 +823,15 @@ function linear8atest(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # unbounded problem
-function linear8btest(solver::MOI.AbstractSolver, config::TestConfig)
+function linear8btest(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     # min -x-y
     # s.t. -x+2y <= 0
     # x,y >= 0
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64})])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64})])
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
     MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x,y], [-1.0,2.0], 0.0), MOI.LessThan(0.0))
@@ -857,15 +857,15 @@ function linear8btest(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # unbounded problem with unique ray
-function linear8ctest(solver::MOI.AbstractSolver, config::TestConfig)
+function linear8ctest(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     # min -x-y
     # s.t. x-y == 0
     # x,y >= 0
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64})])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64})])
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
     MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x,y], [1.0,-1.0], 0.0), MOI.EqualTo(0.0))
@@ -895,7 +895,7 @@ function linear8ctest(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # addconstraints
-function linear9test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear9test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     #   maximize 1000 x + 350 y
@@ -908,15 +908,15 @@ function linear9test(solver::MOI.AbstractSolver, config::TestConfig)
     #
     #   solution: (59.0909, 36.3636)
     #   objv: 71818.1818
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
-        [
-            (MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}),
-            (MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}),
-            (MOI.SingleVariable,MOI.GreaterThan{Float64})
-        ]
-    )
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
+    #    [
+    #        (MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}),
+    #        (MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}),
+    #        (MOI.SingleVariable,MOI.GreaterThan{Float64})
+    #    ]
+    #)
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
 
@@ -956,21 +956,21 @@ function linear9test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # ranged constraints
-function linear10test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear10test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     #   maximize x + y
     #
     #       s.t.  5 <= x + y <= 10
     #                  x,  y >= 0
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
-        [
-            (MOI.ScalarAffineFunction{Float64},MOI.Interval{Float64}),
-            (MOI.SingleVariable,MOI.GreaterThan{Float64})
-        ]
-    )
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
+    #    [
+    #        (MOI.ScalarAffineFunction{Float64},MOI.Interval{Float64}),
+    #        (MOI.SingleVariable,MOI.GreaterThan{Float64})
+    #    ]
+    #)
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
 
@@ -1034,21 +1034,21 @@ function linear10test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # changing constraint sense
-function linear11test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear11test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     # simple 2 variable, 1 constraint problem
     # min x + y
     # st   x + y >= 1
     #      x + y >= 2
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
-        [
-            (MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}),
-            (MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64})
-        ]
-    )
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
+    #    [
+    #        (MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}),
+    #        (MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64})
+    #    ]
+    #)
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     v = MOI.addvariables!(instance, 2)
 
@@ -1079,16 +1079,16 @@ function linear11test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # infeasible problem with 2 linear constraints
-function linear12test(solver::MOI.AbstractSolver, config::TestConfig)
+function linear12test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     # min x
     # s.t. 2x-3y <= -7
     #      y <= 2
     # x,y >= 0
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64})])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64})])
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
     c1 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x,y], [2.0,-3.0], 0.0), MOI.LessThan(-7.0))

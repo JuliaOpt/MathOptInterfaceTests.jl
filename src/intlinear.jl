@@ -1,7 +1,7 @@
 using MathOptInterfaceUtilities
 
 # MIP01 from CPLEX.jl
-function int1test(solver::MOI.AbstractSolver, config::TestConfig)
+function int1test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     # an example on mixed integer programming
@@ -15,9 +15,9 @@ function int1test(solver::MOI.AbstractSolver, config::TestConfig)
     #         y is integer: 0 <= y <= 10
     #         z is binary
 
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64}), (MOI.SingleVariable, MOI.ZeroOne), (MOI.SingleVariable, MOI.Integer)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}),(MOI.SingleVariable,MOI.GreaterThan{Float64}), (MOI.SingleVariable, MOI.ZeroOne), (MOI.SingleVariable, MOI.Integer)])
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
     v = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
@@ -97,15 +97,15 @@ Base.isapprox(a::T, b::T; kwargs...) where T <: Union{MOI.SOS1, MOI.SOS2} = isap
 Base.:(==)(a::MOI.VectorOfVariables, b::MOI.VectorOfVariables) = (a.variables == b.variables)
 
 # sos from CPLEX.jl" begin
-function int2test(solver::MOI.AbstractSolver, config::TestConfig)
+function int2test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [ (MOI.VectorOfVariables, MOI.SOS1),
-                                                                        (MOI.VectorOfVariables, MOI.SOS2) ])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [ (MOI.VectorOfVariables, MOI.SOS1),
+    #                                                                    (MOI.VectorOfVariables, MOI.SOS2) ])
     @testset "SOSI" begin
-        @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorOfVariables,MOI.SOS1), (MOI.SingleVariable,MOI.LessThan{Float64})])
+        #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorOfVariables,MOI.SOS1), (MOI.SingleVariable,MOI.LessThan{Float64})])
 
-        instance = MOI.SolverInstance(solver)
+        instance = solver()
 
         v = MOI.addvariables!(instance, 3)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 3
@@ -177,17 +177,17 @@ function int2test(solver::MOI.AbstractSolver, config::TestConfig)
         @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1,1,2] atol=atol rtol=rtol
     end
     @testset "SOSII" begin
-        @test MOI.supportsproblem(solver,
-            MOI.ScalarAffineFunction{Float64},
-            [
-                (MOI.VectorOfVariables,MOI.SOS1),
-                (MOI.VectorOfVariables,MOI.SOS2),
-                (MOI.SingleVariable, MOI.ZeroOne),
-                (MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64})
-                ]
-        )
+        #@test MOI.supportsproblem(solver,
+        #    MOI.ScalarAffineFunction{Float64},
+        #    [
+        #        (MOI.VectorOfVariables,MOI.SOS1),
+        #        (MOI.VectorOfVariables,MOI.SOS2),
+        #        (MOI.SingleVariable, MOI.ZeroOne),
+        #        (MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64})
+        #        ]
+        #)
 
-        instance = MOI.SolverInstance(solver)
+        instance = solver()
 
         v = MOI.addvariables!(instance, 10)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 10
@@ -280,7 +280,7 @@ function int2test(solver::MOI.AbstractSolver, config::TestConfig)
 end
 
 # CPLEX #76
-function int3test(solver::MOI.AbstractSolver, config::TestConfig)
+function int3test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     # integer knapsack problem
@@ -289,16 +289,16 @@ function int3test(solver::MOI.AbstractSolver, config::TestConfig)
     #       b1, b2, ... b10 ∈ {0, 1}
     #       z in {0, 1, 2, ..., 100}
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
-        [
-            (MOI.SingleVariable,MOI.ZeroOne),
-            (MOI.SingleVariable,MOI.Integer),
-            (MOI.SingleVariable,MOI.Interval{Float64}),
-            (MOI.ScalarAffineFunction{Float64},MOI.Interval{Float64})
-        ]
-    )
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
+    #    [
+    #        (MOI.SingleVariable,MOI.ZeroOne),
+    #        (MOI.SingleVariable,MOI.Integer),
+    #        (MOI.SingleVariable,MOI.Interval{Float64}),
+    #        (MOI.ScalarAffineFunction{Float64},MOI.Interval{Float64})
+    #    ]
+    #)
 
     z = MOI.addvariable!(instance)
     MOI.addconstraint!(instance, MOI.SingleVariable(z), MOI.Integer())
@@ -342,7 +342,7 @@ end
 
 # Mixed-integer linear problems
 
-function knapsacktest(solver::MOI.AbstractSolver, config::TestConfig)
+function knapsacktest(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
     # integer knapsack problem
@@ -350,9 +350,9 @@ function knapsacktest(solver::MOI.AbstractSolver, config::TestConfig)
     # st  2a + 8b + 4c + 2d + 5e <= 10
     #                  a,b,c,d,e ∈ binary
 
-    instance = MOI.SolverInstance(solver)
+    instance = solver()
 
-    @test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.SingleVariable,MOI.ZeroOne),(MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64})])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.SingleVariable,MOI.ZeroOne),(MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64})])
 
     v = MOI.addvariables!(instance, 5)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 5
