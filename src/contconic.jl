@@ -45,7 +45,7 @@ function lin1test(solver::Function, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals        
+    if config.duals
         @test MOI.canget(instance, MOI.DualStatus())
         @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
     end
@@ -95,7 +95,7 @@ function lin1atest(solver::Function, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals 
+    if config.duals
         @test MOI.canget(instance, MOI.DualStatus())
         @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
     end
@@ -162,7 +162,7 @@ function lin2test(solver::Function, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals 
+    if config.duals
         @test MOI.canget(instance, MOI.DualStatus())
         @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
     end
@@ -229,7 +229,7 @@ function lin2atest(solver::Function, config::TestConfig)
 
     @test MOI.canget(instance, MOI.PrimalStatus())
     @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals 
+    if config.duals
         @test MOI.canget(instance, MOI.DualStatus())
         @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
     end
@@ -327,7 +327,7 @@ function lin4test(solver::Function, config::TestConfig)
     if MOI.canget(instance, MOI.PrimalStatus())
         @test MOI.get(instance, MOI.PrimalStatus()) == MOI.InfeasiblePoint
     end
-    if config.duals && config.infeas_certificates 
+    if config.duals && config.infeas_certificates
         @test MOI.canget(instance, MOI.DualStatus())
         @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
     end
