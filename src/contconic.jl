@@ -1249,14 +1249,14 @@ function _det1test(solver::Function, config::TestConfig, vecofvars::Bool, detcon
     # Let Q = inv(P) (x^T Q x ≤ 1 is its polar ellipsoid), we have
     # max t
     #     t <= log det Q (or t <= (det Q)^(1/n))
-    #            Q22 ≤ 1
-    #           _________
-    #          |         |
-    #          |         |
-    # Q11 ≥ -1 |    +    | Q11 ≤ 1
-    #          |         |
-    #          |_________|
-    #           Q22 ≥ -1
+    #             Q22 ≤ 1
+    #            _________
+    #           |         |
+    #           |         |
+    # -Q11 ≥ -1 |    +    | Q11 ≤ 1
+    #           |         |
+    #           |_________|
+    #            -Q22 ≥ -1
 
     instance = solver()
 
@@ -1272,7 +1272,7 @@ function _det1test(solver::Function, config::TestConfig, vecofvars::Bool, detcon
         cX = MOI.addconstraint!(instance, MOI.VectorAffineFunction{Float64}(vov), detcone(2))
     end
 
-    c = MOI.addconstraint!(instance, MOI.VectorAffineFunction(collect(1:4), [Q[1], Q[1], Q[end], Q[end]], [-1., 1., -1., 1.], ones(4)), MOI.Nonnegatives(4))
+    c = MOI.addconstraint!(instance, MOI.VectorAffineFunction(collect(1:2), [Q[1], Q[end]], [-1., -1.], ones(2)), MOI.Nonnegatives(2))
 
     @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64}, detcone}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.Nonnegatives}()) == 1
