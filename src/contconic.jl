@@ -817,7 +817,7 @@ function rotatedsoc2test(solver::Function, config::TestConfig)
     #      -1 + x ∈ R₋
     #     1/2 - y ∈ {0}
     #      -2 + z ∈ R₊
-    #       (x,y,z) ∈ SOCRoated
+    #       (x,y,z) ∈ SOCRotated
     b = [-2, -1, 1/2]
     c = [0.0,0.0,0.0]
 
