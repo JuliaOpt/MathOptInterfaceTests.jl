@@ -48,48 +48,50 @@ function int1test(solver::Function, config::TestConfig)
 
     @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.ResultCount())
-    @test MOI.get(instance, MOI.ResultCount()) >= 1
+        @test MOI.canget(instance, MOI.ResultCount())
+        @test MOI.get(instance, MOI.ResultCount()) >= 1
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) in [ MOI.FeasiblePoint, MOI.NearlyFeasiblePoint ]
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) in [ MOI.FeasiblePoint, MOI.NearlyFeasiblePoint ]
 
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 19.4 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 19.4 atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.VariablePrimal(), v)
-    @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [4,5,1] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.VariablePrimal(), v)
+        @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [4,5,1] atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.ConstraintPrimal(), c)
-    @test MOI.get(instance, MOI.ConstraintPrimal(), c) ≈ 10 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), c)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c) ≈ 10 atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.ConstraintPrimal(), c2)
-    @test MOI.get(instance, MOI.ConstraintPrimal(), c2) ≈ 15 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), c2)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c2) ≈ 15 atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.DualStatus()) == false
+        @test MOI.canget(instance, MOI.DualStatus()) == false
 
-    if MOI.canget(instance, MOI.ObjectiveBound())
-        @test MOI.get(instance, MOI.ObjectiveBound()) >= 19.4
-    end
-    if MOI.canget(instance, MOI.RelativeGap())
-        @test MOI.get(instance, MOI.RelativeGap()) >= 0.0
-    end
-    if MOI.canget(instance, MOI.SolveTime())
-        @test MOI.get(instance, MOI.SolveTime()) >= 0.0
-    end
-    if MOI.canget(instance, MOI.SimplexIterations())
-        @test MOI.get(instance, MOI.SimplexIterations()) >= 0
-    end
-    if MOI.canget(instance, MOI.BarrierIterations())
-        @test MOI.get(instance, MOI.BarrierIterations()) >= 0
-    end
-    if MOI.canget(instance, MOI.NodeCount())
-        @test MOI.get(instance, MOI.NodeCount()) >= 0
+        if MOI.canget(instance, MOI.ObjectiveBound())
+            @test MOI.get(instance, MOI.ObjectiveBound()) >= 19.4
+        end
+        if MOI.canget(instance, MOI.RelativeGap())
+            @test MOI.get(instance, MOI.RelativeGap()) >= 0.0
+        end
+        if MOI.canget(instance, MOI.SolveTime())
+            @test MOI.get(instance, MOI.SolveTime()) >= 0.0
+        end
+        if MOI.canget(instance, MOI.SimplexIterations())
+            @test MOI.get(instance, MOI.SimplexIterations()) >= 0
+        end
+        if MOI.canget(instance, MOI.BarrierIterations())
+            @test MOI.get(instance, MOI.BarrierIterations()) >= 0
+        end
+        if MOI.canget(instance, MOI.NodeCount())
+            @test MOI.get(instance, MOI.NodeCount()) >= 0
+        end
     end
 end
 
@@ -135,46 +137,50 @@ function int2test(solver::Function, config::TestConfig)
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
 
-        MOI.optimize!(instance)
+        if config.solve
+            MOI.optimize!(instance)
 
-        @test MOI.canget(instance, MOI.TerminationStatus())
-        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+            @test MOI.canget(instance, MOI.TerminationStatus())
+            @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-        @test MOI.canget(instance, MOI.ResultCount())
-        @test MOI.get(instance, MOI.ResultCount()) >= 1
+            @test MOI.canget(instance, MOI.ResultCount())
+            @test MOI.get(instance, MOI.ResultCount()) >= 1
 
-        @test MOI.canget(instance, MOI.PrimalStatus())
-        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+            @test MOI.canget(instance, MOI.PrimalStatus())
+            @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
 
-        @test MOI.canget(instance, MOI.ObjectiveValue())
-        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 3 atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ObjectiveValue())
+            @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 3 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), v)
-        @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0,1,2] atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.VariablePrimal(), v)
+            @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0,1,2] atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.DualStatus()) == false
+            @test MOI.canget(instance, MOI.DualStatus()) == false
+        end
 
         @test MOI.candelete(instance, c1)
         MOI.delete!(instance, c1)
         @test MOI.candelete(instance, c2)
         MOI.delete!(instance, c2)
 
-        MOI.optimize!(instance)
+        if config.solve
+            MOI.optimize!(instance)
 
-        @test MOI.canget(instance, MOI.TerminationStatus())
-        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+            @test MOI.canget(instance, MOI.TerminationStatus())
+            @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-        @test MOI.canget(instance, MOI.ResultCount())
-        @test MOI.get(instance, MOI.ResultCount()) >= 1
+            @test MOI.canget(instance, MOI.ResultCount())
+            @test MOI.get(instance, MOI.ResultCount()) >= 1
 
-        @test MOI.canget(instance, MOI.PrimalStatus())
-        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+            @test MOI.canget(instance, MOI.PrimalStatus())
+            @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
 
-        @test MOI.canget(instance, MOI.ObjectiveValue())
-        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 5 atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ObjectiveValue())
+            @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 5 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), v)
-        @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1,1,2] atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.VariablePrimal(), v)
+            @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1,1,2] atol=atol rtol=rtol
+        end
     end
     @testset "SOSII" begin
         #@test MOI.supportsproblem(solver,
@@ -234,48 +240,52 @@ function int2test(solver::Function, config::TestConfig)
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
 
-        MOI.optimize!(instance)
+        if config.solve
+            MOI.optimize!(instance)
 
-        @test MOI.canget(instance, MOI.TerminationStatus())
-        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+            @test MOI.canget(instance, MOI.TerminationStatus())
+            @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-        @test MOI.canget(instance, MOI.ResultCount())
-        @test MOI.get(instance, MOI.ResultCount()) >= 1
+            @test MOI.canget(instance, MOI.ResultCount())
+            @test MOI.get(instance, MOI.ResultCount()) >= 1
 
-        @test MOI.canget(instance, MOI.PrimalStatus())
-        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+            @test MOI.canget(instance, MOI.PrimalStatus())
+            @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
 
-        @test MOI.canget(instance, MOI.ObjectiveValue())
-        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 15.0 atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ObjectiveValue())
+            @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 15.0 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), v)
-        @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 3.0, 12.0] atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.VariablePrimal(), v)
+            @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 3.0, 12.0] atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.DualStatus()) == false
+            @test MOI.canget(instance, MOI.DualStatus()) == false
+        end
 
         for cref in bin_constraints
             @test MOI.candelete(instance, cref)
             MOI.delete!(instance, cref)
         end
 
-        MOI.optimize!(instance)
+        if config.solve
+            MOI.optimize!(instance)
 
-        @test MOI.canget(instance, MOI.TerminationStatus())
-        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+            @test MOI.canget(instance, MOI.TerminationStatus())
+            @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-        @test MOI.canget(instance, MOI.ResultCount())
-        @test MOI.get(instance, MOI.ResultCount()) >= 1
+            @test MOI.canget(instance, MOI.ResultCount())
+            @test MOI.get(instance, MOI.ResultCount()) >= 1
 
-        @test MOI.canget(instance, MOI.PrimalStatus())
-        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+            @test MOI.canget(instance, MOI.PrimalStatus())
+            @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
 
-        @test MOI.canget(instance, MOI.ObjectiveValue())
-        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 30.0 atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ObjectiveValue())
+            @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 30.0 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), v)
-        @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0.0, 0.0, 2.0, 2.0, 0.0, 2.0, 0.0, 0.0, 6.0, 24.0] atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.VariablePrimal(), v)
+            @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0.0, 0.0, 2.0, 2.0, 0.0, 2.0, 0.0, 0.0, 6.0, 24.0] atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.DualStatus()) == false
+            @test MOI.canget(instance, MOI.DualStatus()) == false
+        end
     end
 end
 
@@ -315,28 +325,30 @@ function int3test(solver::Function, config::TestConfig)
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(vcat(z, b[1:3]), vcat(1.0, fill(-0.5 / 40, 3)), 0.0))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
 
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 1 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 1 atol=atol rtol=rtol
 
-    # test for CPLEX.jl #76
-    MOI.optimize!(instance)
+        # test for CPLEX.jl #76
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
 
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 1 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 1 atol=atol rtol=rtol
+    end
 end
 
 
@@ -371,19 +383,21 @@ function knapsacktest(solver::Function, config::TestConfig)
         MOI.set!(instance, MOI.VariablePrimalStart(), v, [0.0, 0.0, 0.0, 0.0, 0.0])
     end
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) in [ MOI.FeasiblePoint, MOI.NearlyFeasiblePoint ]
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) in [ MOI.FeasiblePoint, MOI.NearlyFeasiblePoint ]
 
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 16 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 16 atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.VariablePrimal(), v)
-    @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 0, 0, 1, 1] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.VariablePrimal(), v)
+        @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 0, 0, 1, 1] atol=atol rtol=rtol
+    end
 end
 
 const intlineartests = Dict("knapsack" => knapsacktest,
