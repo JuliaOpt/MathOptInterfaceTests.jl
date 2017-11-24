@@ -939,36 +939,38 @@ function _geomean1test(solver::Function, config::TestConfig, vecofvars, n=3)
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([t], [1.], 0.))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
 
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 1 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 1 atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.VariablePrimal(), t)
-    @test MOI.get(instance, MOI.VariablePrimal(), t) ≈ 1 atol=atol rtol=rtol
-    @test MOI.canget(instance, MOI.VariablePrimal(), x)
-    @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ ones(n) atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.VariablePrimal(), t)
+        @test MOI.get(instance, MOI.VariablePrimal(), t) ≈ 1 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.VariablePrimal(), x)
+        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ ones(n) atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.ConstraintPrimal(), gmc)
-    @test MOI.get(instance, MOI.ConstraintPrimal(), gmc) ≈ ones(n+1) atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), gmc)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), gmc) ≈ ones(n+1) atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.ConstraintPrimal(), c)
-    @test MOI.get(instance, MOI.ConstraintPrimal(), c) ≈ n atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), c)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c) ≈ n atol=atol rtol=rtol
 
-#    if config.duals
-#        @test MOI.canget(instance, MOI.DualStatus())
-#        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-#
-#        @test MOI.canget(instance, MOI.ConstraintDual(), gmc)
-#        @show MOI.get(instance, MOI.ConstraintDual(), gmc)
-#
-#        @test MOI.canget(instance, MOI.ConstraintDual(), c)
-#        @show MOI.get(instance, MOI.ConstraintDual(), c)
-#    end
+    #    if config.duals
+    #        @test MOI.canget(instance, MOI.DualStatus())
+    #        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+    #
+    #        @test MOI.canget(instance, MOI.ConstraintDual(), gmc)
+    #        @show MOI.get(instance, MOI.ConstraintDual(), gmc)
+    #
+    #        @test MOI.canget(instance, MOI.ConstraintDual(), c)
+    #        @show MOI.get(instance, MOI.ConstraintDual(), c)
+    #    end
+    end
 end
 
 geomean1vtest(solver::Function, config::TestConfig) = _geomean1test(solver, config, true)
@@ -1315,29 +1317,31 @@ function _det1test(solver::Function, config::TestConfig, vecofvars::Bool, detcon
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([t], ones(1), 0.))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
 
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    expectedobjval = logdet ? 0. : 1.
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ expectedobjval atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        expectedobjval = logdet ? 0. : 1.
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ expectedobjval atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.VariablePrimal(), t)
-    @test MOI.get(instance, MOI.VariablePrimal(), t) ≈ expectedobjval atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.VariablePrimal(), t)
+        @test MOI.get(instance, MOI.VariablePrimal(), t) ≈ expectedobjval atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.VariablePrimal(), Q)
-    Qv = MOI.get(instance, MOI.VariablePrimal(), Q)
-    @test Qv[1] ≈ 1. atol=atol rtol=rtol
-    @test Qv[2] ≈ 0. atol=atol rtol=rtol
-    if square
-        @test Qv[3] ≈ 0. atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.VariablePrimal(), Q)
+        Qv = MOI.get(instance, MOI.VariablePrimal(), Q)
+        @test Qv[1] ≈ 1. atol=atol rtol=rtol
+        @test Qv[2] ≈ 0. atol=atol rtol=rtol
+        if square
+            @test Qv[3] ≈ 0. atol=atol rtol=rtol
+        end
+        @test Qv[end] ≈ 1. atol=atol rtol=rtol
     end
-    @test Qv[end] ≈ 1. atol=atol rtol=rtol
 end
 
 logdet1tvtest(solver::Function, config::TestConfig) = _det1test(solver, config, true, MOI.LogDetConeTriangle)
