@@ -904,6 +904,81 @@ const rsoctests = Dict("rotatedsoc1"  => rotatedsoc1test,
 
 @moitestset rsoc
 
+function _geomean1test(solver::Function, config::TestConfig, vecofvars, n=3)
+    atol = config.atol
+    rtol = config.rtol
+    # Problem GeoMean1
+    # max (xyz)^(1/3)
+    # s.t.
+    #      x + y + z ≤ 3
+    # in conic form:
+    # max t
+    # s.t.
+    #   (t,x,y,z) ∈ GeometricMeanCone(4)
+    #     x+y+z-3 ∈ LessThan(0.)
+    # By the arithmetic-geometric mean inequality,
+    # (xyz)^(1/3) ≤ (x+y+z)/3 = 1
+    # Therefore xyz ≤ 1
+    # This can be attained using x = y = z = 1 so it is optimal.
+
+    instance = solver()
+
+    t = MOI.addvariable!(instance)
+    x = MOI.addvariables!(instance, n)
+
+    vov = MOI.VectorOfVariables([t; x])
+    if vecofvars
+        gmc = MOI.addconstraint!(instance, vov, MOI.GeometricMeanCone(n+1))
+    else
+        gmc = MOI.addconstraint!(instance, MOI.VectorAffineFunction{Float64}(vov), MOI.GeometricMeanCone(n+1))
+    end
+    c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(x, ones(n), 0.), MOI.LessThan(Float64(n)))
+
+    @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64}, MOI.GeometricMeanCone}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}()) == 1
+
+    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([t], [1.], 0.))
+    MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
+    MOI.optimize!(instance)
+
+    @test MOI.canget(instance, MOI.TerminationStatus())
+    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+
+    @test MOI.canget(instance, MOI.ObjectiveValue())
+    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 1 atol=atol rtol=rtol
+
+    @test MOI.canget(instance, MOI.VariablePrimal(), t)
+    @test MOI.get(instance, MOI.VariablePrimal(), t) ≈ 1 atol=atol rtol=rtol
+    @test MOI.canget(instance, MOI.VariablePrimal(), x)
+    @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ ones(n) atol=atol rtol=rtol
+
+    @test MOI.canget(instance, MOI.ConstraintPrimal(), gmc)
+    @test MOI.get(instance, MOI.ConstraintPrimal(), gmc) ≈ ones(n+1) atol=atol rtol=rtol
+
+    @test MOI.canget(instance, MOI.ConstraintPrimal(), c)
+    @test MOI.get(instance, MOI.ConstraintPrimal(), c) ≈ n atol=atol rtol=rtol
+
+#    if config.duals
+#        @test MOI.canget(instance, MOI.DualStatus())
+#        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+#
+#        @test MOI.canget(instance, MOI.ConstraintDual(), gmc)
+#        @show MOI.get(instance, MOI.ConstraintDual(), gmc)
+#
+#        @test MOI.canget(instance, MOI.ConstraintDual(), c)
+#        @show MOI.get(instance, MOI.ConstraintDual(), c)
+#    end
+end
+
+geomean1vtest(solver::Function, config::TestConfig) = _geomean1test(solver, config, true)
+geomean1ftest(solver::Function, config::TestConfig) = _geomean1test(solver, config, false)
+
+geomeantests = Dict("geomean1v" => geomean1vtest,
+                    "geomean1f" => geomean1ftest)
+
+@moitestset geomean
+
 function _sdp0test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
@@ -1201,9 +1276,100 @@ const sdptests = Dict("sdp0tv" => sdp0tvtest,
 
 @moitestset sdp
 
+function _det1test(solver::Function, config::TestConfig, vecofvars::Bool, detcone)
+    atol = config.atol
+    rtol = config.rtol
+    square = detcone == MOI.LogDetConeSquare || detcone == MOI.RootDetConeSquare
+    logdet = detcone == MOI.LogDetConeTriangle || detcone == MOI.LogDetConeScaled || detcone == MOI.LogDetConeSquare
+    # We look for an ellipsoid x^T P x ≤ 1 contained in the square.
+    # Let Q = inv(P) (x^T Q x ≤ 1 is its polar ellipsoid), we have
+    # max t
+    #     t <= log det Q (or t <= (det Q)^(1/n))
+    #             Q22 ≤ 1
+    #            _________
+    #           |         |
+    #           |         |
+    # -Q11 ≥ -1 |    +    | Q11 ≤ 1
+    #           |         |
+    #           |_________|
+    #            -Q22 ≥ -1
+
+    instance = solver()
+
+    t = MOI.addvariable!(instance)
+    @test MOI.get(instance, MOI.NumberOfVariables()) == 1
+    Q = MOI.addvariables!(instance, square ? 4 : 3)
+    @test MOI.get(instance, MOI.NumberOfVariables()) == (square ? 5 : 4)
+
+    vov = MOI.VectorOfVariables([t; Q])
+    if vecofvars
+        cX = MOI.addconstraint!(instance, vov, detcone(2))
+    else
+        cX = MOI.addconstraint!(instance, MOI.VectorAffineFunction{Float64}(vov), detcone(2))
+    end
+
+    c = MOI.addconstraint!(instance, MOI.VectorAffineFunction(collect(1:2), [Q[1], Q[end]], [-1., -1.], ones(2)), MOI.Nonnegatives(2))
+
+    @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64}, detcone}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.Nonnegatives}()) == 1
+
+    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([t], ones(1), 0.))
+    MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
+    MOI.optimize!(instance)
+
+    @test MOI.canget(instance, MOI.TerminationStatus())
+    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+
+    @test MOI.canget(instance, MOI.PrimalStatus())
+    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+
+    @test MOI.canget(instance, MOI.ObjectiveValue())
+    expectedobjval = logdet ? 0. : 1.
+    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ expectedobjval atol=atol rtol=rtol
+
+    @test MOI.canget(instance, MOI.VariablePrimal(), t)
+    @test MOI.get(instance, MOI.VariablePrimal(), t) ≈ expectedobjval atol=atol rtol=rtol
+
+    @test MOI.canget(instance, MOI.VariablePrimal(), Q)
+    Qv = MOI.get(instance, MOI.VariablePrimal(), Q)
+    @test Qv[1] ≈ 1. atol=atol rtol=rtol
+    @test Qv[2] ≈ 0. atol=atol rtol=rtol
+    if square
+        @test Qv[3] ≈ 0. atol=atol rtol=rtol
+    end
+    @test Qv[end] ≈ 1. atol=atol rtol=rtol
+end
+
+logdet1tvtest(solver::Function, config::TestConfig) = _det1test(solver, config, true, MOI.LogDetConeTriangle)
+logdet1tftest(solver::Function, config::TestConfig) = _det1test(solver, config, false, MOI.LogDetConeTriangle)
+logdet1qvtest(solver::Function, config::TestConfig) = _det1test(solver, config, true, MOI.LogDetConeSquare)
+logdet1qftest(solver::Function, config::TestConfig) = _det1test(solver, config, false, MOI.LogDetConeSquare)
+
+const logdettests = Dict("logdet1tv" => logdet1tvtest,
+                         "logdet1tf" => logdet1tftest,
+                         "logdet1qv" => logdet1qvtest,
+                         "logdet1qf" => logdet1qftest)
+
+@moitestset logdet
+
+rootdet1tvtest(solver::Function, config::TestConfig) = _det1test(solver, config, true, MOI.RootDetConeTriangle)
+rootdet1tftest(solver::Function, config::TestConfig) = _det1test(solver, config, false, MOI.RootDetConeTriangle)
+rootdet1qvtest(solver::Function, config::TestConfig) = _det1test(solver, config, true, MOI.RootDetConeSquare)
+rootdet1qftest(solver::Function, config::TestConfig) = _det1test(solver, config, false, MOI.RootDetConeSquare)
+
+const rootdettests = Dict("rootdet1tv" => rootdet1tvtest,
+                          "rootdet1tf" => rootdet1tftest,
+                          "rootdet1qv" => rootdet1qvtest,
+                          "rootdet1qf" => rootdet1qftest)
+
+@moitestset rootdet
+
 const contconictests = Dict("lin" => lintest,
                             "soc" => soctest,
                             "rsoc" => rsoctest,
-                            "sdp" => sdptest)
+                            "sdp" => sdptest,
+                            "geomean" => geomeantest,
+                            "logdet" => logdettest,
+                            "rootdet" => rootdettest)
 
 @moitestset contconic true
