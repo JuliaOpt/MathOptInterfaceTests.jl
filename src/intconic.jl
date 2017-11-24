@@ -33,21 +33,23 @@ function intsoc1test(solver::Function; atol=Base.rtoldefault(Float64), rtol=Base
         bin1 = MOI.addconstraint!(instance, MOI.SingleVariable(y), MOI.ZeroOne)
         bin2 = MOI.addconstraint!(instance, MOI.SingleVariable(z), MOI.ZeroOne)
 
-        MOI.optimize!(instance)
+        if config.solve
+            MOI.optimize!(instance)
 
-        @test MOI.canget(instance, MOI.TerminationStatus())
-        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+            @test MOI.canget(instance, MOI.TerminationStatus())
+            @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-        @test MOI.canget(instance, MOI.PrimalStatus())
-        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+            @test MOI.canget(instance, MOI.PrimalStatus())
+            @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
 
-        @test MOI.canget(instance, MOI.ObjectiveValue())
-        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -2 atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ObjectiveValue())
+            @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -2 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), x)
-        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ 1 atol=atol rtol=rtol
-        @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1 atol=atol rtol=rtol
-        @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 0 atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.VariablePrimal(), x)
+            @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ 1 atol=atol rtol=rtol
+            @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1 atol=atol rtol=rtol
+            @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 0 atol=atol rtol=rtol
+        end
 
     end
 end

@@ -38,30 +38,32 @@ function lin1test(solver::Function, config::TestConfig)
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(v, [-3.0, -2.0, -4.0], 0.0))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
+
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -11 atol=atol rtol=rtol
+
+        @test MOI.canget(instance, MOI.VariablePrimal(), v)
+        @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 0, 2] atol=atol rtol=rtol
+
+        if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [-3, -1] atol=atol rtol=rtol
+        end
+
+        # TODO var dual and con primal
     end
-
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -11 atol=atol rtol=rtol
-
-    @test MOI.canget(instance, MOI.VariablePrimal(), v)
-    @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 0, 2] atol=atol rtol=rtol
-
-    if config.duals
-        @test MOI.canget(instance, MOI.ConstraintDual(), c)
-        @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [-3, -1] atol=atol rtol=rtol
-    end
-
-    # TODO var dual and con primal
 end
 
 function lin1atest(solver::Function, config::TestConfig)
@@ -88,30 +90,32 @@ function lin1atest(solver::Function, config::TestConfig)
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(v, [-3.0, -2.0, -4.0], 0.0))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
+
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -11 atol=atol rtol=rtol
+
+        @test MOI.canget(instance, MOI.VariablePrimal(), v)
+        @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 0, 2] atol=atol rtol=rtol
+
+        if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [-3, -1] atol=atol rtol=rtol
+        end
+
+        # TODO var dual and con primal
     end
-
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -11 atol=atol rtol=rtol
-
-    @test MOI.canget(instance, MOI.VariablePrimal(), v)
-    @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 0, 2] atol=atol rtol=rtol
-
-    if config.duals
-        @test MOI.canget(instance, MOI.ConstraintDual(), c)
-        @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [-3, -1] atol=atol rtol=rtol
-    end
-
-    # TODO var dual and con primal
 end
 
 function lin2test(solver::Function, config::TestConfig)
@@ -155,33 +159,35 @@ function lin2test(solver::Function, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorOfVariables,MOI.Nonpositives}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorOfVariables,MOI.Nonnegatives}()) == 1
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
+
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -82 atol=atol rtol=rtol
+
+        @test MOI.canget(instance, MOI.VariablePrimal(), x)
+        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ -4 atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ -3 atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 16 atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), s) ≈ 0 atol=atol rtol=rtol
+
+        if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [7, 2, -4] atol=atol rtol=rtol
+        end
+
+        # TODO var dual and con primal
     end
-
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -82 atol=atol rtol=rtol
-
-    @test MOI.canget(instance, MOI.VariablePrimal(), x)
-    @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ -4 atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ -3 atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 16 atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), s) ≈ 0 atol=atol rtol=rtol
-
-    if config.duals
-        @test MOI.canget(instance, MOI.ConstraintDual(), c)
-        @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [7, 2, -4] atol=atol rtol=rtol
-    end
-
-    # TODO var dual and con primal
 end
 
 function lin2atest(solver::Function, config::TestConfig)
@@ -222,33 +228,35 @@ function lin2atest(solver::Function, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Nonnegatives}()) == 1
 
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
+
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -82 atol=atol rtol=rtol
+
+        @test MOI.canget(instance, MOI.VariablePrimal(), x)
+        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ -4 atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ -3 atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 16 atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), s) ≈ 0 atol=atol rtol=rtol
+
+        if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [7, 2, -4] atol=atol rtol=rtol
+        end
+
+        # TODO var dual and con primal
     end
-
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -82 atol=atol rtol=rtol
-
-    @test MOI.canget(instance, MOI.VariablePrimal(), x)
-    @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ -4 atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ -3 atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 16 atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), s) ≈ 0 atol=atol rtol=rtol
-
-    if config.duals
-        @test MOI.canget(instance, MOI.ConstraintDual(), c)
-        @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [7, 2, -4] atol=atol rtol=rtol
-    end
-
-    # TODO var dual and con primal
 end
 
 function lin3test(solver::Function, config::TestConfig)
@@ -274,22 +282,24 @@ function lin3test(solver::Function, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Nonnegatives}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Nonpositives}()) == 1
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    if config.infeas_certificates
-        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
-    else
-        @test MOI.get(instance, MOI.TerminationStatus()) in [MOI.InfeasibleNoResult, MOI.InfeasibleOrUnbounded]
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        if config.infeas_certificates
+            @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        else
+            @test MOI.get(instance, MOI.TerminationStatus()) in [MOI.InfeasibleNoResult, MOI.InfeasibleOrUnbounded]
+        end
+        if MOI.canget(instance, MOI.PrimalStatus())
+            @test MOI.get(instance, MOI.PrimalStatus()) == MOI.InfeasiblePoint
+        end
+        if config.duals && config.infeas_certificates
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
+        end
+        # TODO test dual feasibility and objective sign
     end
-    if MOI.canget(instance, MOI.PrimalStatus())
-        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.InfeasiblePoint
-    end
-    if config.duals && config.infeas_certificates
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
-    end
-    # TODO test dual feasibility and objective sign
 end
 
 function lin4test(solver::Function, config::TestConfig)
@@ -315,23 +325,25 @@ function lin4test(solver::Function, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Nonnegatives}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorOfVariables,MOI.Nonpositives}()) == 1
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    if config.infeas_certificates
-        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
-    else
-        @test MOI.get(instance, MOI.TerminationStatus()) in [MOI.InfeasibleNoResult, MOI.InfeasibleOrUnbounded]
-    end
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        if config.infeas_certificates
+            @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        else
+            @test MOI.get(instance, MOI.TerminationStatus()) in [MOI.InfeasibleNoResult, MOI.InfeasibleOrUnbounded]
+        end
 
-    if MOI.canget(instance, MOI.PrimalStatus())
-        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.InfeasiblePoint
+        if MOI.canget(instance, MOI.PrimalStatus())
+            @test MOI.get(instance, MOI.PrimalStatus()) == MOI.InfeasiblePoint
+        end
+        if config.duals && config.infeas_certificates
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
+        end
+        # TODO test dual feasibility and objective sign
     end
-    if config.duals && config.infeas_certificates
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
-    end
-    # TODO test dual feasibility and objective sign
 end
 
 const lintests = Dict("lin1"  => lin1test,
@@ -369,34 +381,36 @@ function soc1test(solver::Function, config::TestConfig)
     @test (MOI.VectorAffineFunction{Float64},MOI.Zeros) in loc
     @test (MOI.VectorOfVariables,MOI.SecondOrderCone) in loc
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
+
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ sqrt(2) atol=atol rtol=rtol
+
+        @test MOI.canget(instance, MOI.VariablePrimal(), x)
+        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ 1 atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1/sqrt(2) atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 1/sqrt(2) atol=atol rtol=rtol
+
+        if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), ceq)
+            @test MOI.get(instance, MOI.ConstraintDual(), ceq) ≈ [-sqrt(2)] atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ConstraintDual(), csoc)
+            @test MOI.get(instance, MOI.ConstraintDual(), csoc) ≈ [sqrt(2), -1.0, -1.0] atol=atol rtol=rtol
+        end
+
+        # TODO con primal
     end
-
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ sqrt(2) atol=atol rtol=rtol
-
-    @test MOI.canget(instance, MOI.VariablePrimal(), x)
-    @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ 1 atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1/sqrt(2) atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 1/sqrt(2) atol=atol rtol=rtol
-
-    if config.duals
-        @test MOI.canget(instance, MOI.ConstraintDual(), ceq)
-        @test MOI.get(instance, MOI.ConstraintDual(), ceq) ≈ [-sqrt(2)] atol=atol rtol=rtol
-        @test MOI.canget(instance, MOI.ConstraintDual(), csoc)
-        @test MOI.get(instance, MOI.ConstraintDual(), csoc) ≈ [sqrt(2), -1.0, -1.0] atol=atol rtol=rtol
-    end
-
-    # TODO con primal
 end
 
 function soc1atest(solver::Function, config::TestConfig)
@@ -422,34 +436,36 @@ function soc1atest(solver::Function, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone}()) == 1
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
+
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ sqrt(2) atol=atol rtol=rtol
+
+        @test MOI.canget(instance, MOI.VariablePrimal(), x)
+        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ 1 atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1/sqrt(2) atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 1/sqrt(2) atol=atol rtol=rtol
+
+        if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), ceq)
+            @test MOI.get(instance, MOI.ConstraintDual(), ceq) ≈ [-sqrt(2)] atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ConstraintDual(), csoc)
+            @test MOI.get(instance, MOI.ConstraintDual(), csoc) ≈ [sqrt(2), -1.0, -1.0] atol=atol rtol=rtol
+        end
+
+        # TODO con primal
     end
-
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ sqrt(2) atol=atol rtol=rtol
-
-    @test MOI.canget(instance, MOI.VariablePrimal(), x)
-    @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ 1 atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1/sqrt(2) atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 1/sqrt(2) atol=atol rtol=rtol
-
-    if config.duals
-        @test MOI.canget(instance, MOI.ConstraintDual(), ceq)
-        @test MOI.get(instance, MOI.ConstraintDual(), ceq) ≈ [-sqrt(2)] atol=atol rtol=rtol
-        @test MOI.canget(instance, MOI.ConstraintDual(), csoc)
-        @test MOI.get(instance, MOI.ConstraintDual(), csoc) ≈ [sqrt(2), -1.0, -1.0] atol=atol rtol=rtol
-    end
-
-    # TODO con primal
 end
 
 function soc2test(solver::Function, config::TestConfig)
@@ -481,26 +497,28 @@ function soc2test(solver::Function, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone}()) == 1
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
+
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -1/sqrt(2) atol=atol rtol=rtol
+
+        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ -1/sqrt(2) atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1/sqrt(2) atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), t) ≈ 1 atol=atol rtol=rtol
+
+        # TODO constraint primal and duals
     end
-
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -1/sqrt(2) atol=atol rtol=rtol
-
-    @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ -1/sqrt(2) atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1/sqrt(2) atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), t) ≈ 1 atol=atol rtol=rtol
-
-    # TODO constraint primal and duals
 end
 
 function soc2atest(solver::Function, config::TestConfig)
@@ -529,26 +547,28 @@ function soc2atest(solver::Function, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone}()) == 1
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
+
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -1/sqrt(2) atol=atol rtol=rtol
+
+        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ -1/sqrt(2) atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1/sqrt(2) atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), t) ≈ 1 atol=atol rtol=rtol
+
+        # TODO constraint primal and duals
     end
-
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -1/sqrt(2) atol=atol rtol=rtol
-
-    @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ -1/sqrt(2) atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1/sqrt(2) atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.VariablePrimal(), t) ≈ 1 atol=atol rtol=rtol
-
-    # TODO constraint primal and duals
 end
 
 function soc3test(solver::Function, config::TestConfig)
@@ -578,18 +598,20 @@ function soc3test(solver::Function, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Nonpositives}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone}()) == 1
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test !MOI.canget(instance, MOI.PrimalStatus())
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
+        @test !MOI.canget(instance, MOI.PrimalStatus())
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
+        end
+
+        # TODO test dual feasibility and objective sign
     end
-
-    # TODO test dual feasibility and objective sign
 end
 
 function soc4test(solver::Function, config::TestConfig)
@@ -631,32 +653,34 @@ function soc4test(solver::Function, config::TestConfig)
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(x,c,0.0))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-    end
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
 
-    @test MOI.canget(instance, MOI.VariablePrimal(), x)
-    x_primal = MOI.get(instance, MOI.VariablePrimal(), x)
-    @test x_primal[1]^2 ≥ x_primal[4]^2 + x_primal[5]^2 - atol
+        @test MOI.canget(instance, MOI.VariablePrimal(), x)
+        x_primal = MOI.get(instance, MOI.VariablePrimal(), x)
+        @test x_primal[1]^2 ≥ x_primal[4]^2 + x_primal[5]^2 - atol
 
-    if config.duals
-        @test MOI.canget(instance, MOI.ConstraintDual(), c2)
-        x_dual = MOI.get(instance, MOI.ConstraintDual(), c2)
-        @test x_dual[1]^2 ≥ x_dual[2]^2 + x_dual[3]^2 - atol
+        if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), c2)
+            x_dual = MOI.get(instance, MOI.ConstraintDual(), c2)
+            @test x_dual[1]^2 ≥ x_dual[2]^2 + x_dual[3]^2 - atol
 
-        @test MOI.canget(instance, MOI.ConstraintDual(), c1)
-        c1_dual = MOI.get(instance, MOI.ConstraintDual(), c1)
+            @test MOI.canget(instance, MOI.ConstraintDual(), c1)
+            c1_dual = MOI.get(instance, MOI.ConstraintDual(), c1)
 
-        @test dot(c,x_primal) ≈ -dot(c1_dual,b) atol=atol rtol=rtol
-        @test (c-A'c1_dual) ≈ [x_dual[1], 0, 0, x_dual[2], x_dual[3]] atol=atol rtol=rtol
+            @test dot(c,x_primal) ≈ -dot(c1_dual,b) atol=atol rtol=rtol
+            @test (c-A'c1_dual) ≈ [x_dual[1], 0, 0, x_dual[2], x_dual[3]] atol=atol rtol=rtol
+        end
     end
 end
 
@@ -699,44 +723,46 @@ function rotatedsoc1test(solver::Function, config::TestConfig)
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(x,c,0.0))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-    end
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
 
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -sqrt(2.0) atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -sqrt(2.0) atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.VariablePrimal(), x)
-    @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ [0.5, 1.0, 1.0/sqrt(2.0), 1.0/sqrt(2.0)] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.VariablePrimal(), x)
+        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ [0.5, 1.0, 1.0/sqrt(2.0), 1.0/sqrt(2.0)] atol=atol rtol=rtol
 
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus(1))
-        @test MOI.get(instance, MOI.DualStatus(1)) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus(1))
+            @test MOI.get(instance, MOI.DualStatus(1)) == MOI.FeasiblePoint
 
-        @test MOI.canget(instance, MOI.ConstraintDual(), vc1)
-        d1 = MOI.get(instance, MOI.ConstraintDual(), vc1)
-        @test MOI.canget(instance, MOI.ConstraintDual(), vc2)
-        d2 = MOI.get(instance, MOI.ConstraintDual(), vc2)
+            @test MOI.canget(instance, MOI.ConstraintDual(), vc1)
+            d1 = MOI.get(instance, MOI.ConstraintDual(), vc1)
+            @test MOI.canget(instance, MOI.ConstraintDual(), vc2)
+            d2 = MOI.get(instance, MOI.ConstraintDual(), vc2)
 
-        d = [d1, d2]
-        dualobj = dot(b, d)
-        @test dualobj ≈ -sqrt(2.0) atol=atol rtol=rtol
-        @test d1 <= atol
-        @test d2 <= atol
+            d = [d1, d2]
+            dualobj = dot(b, d)
+            @test dualobj ≈ -sqrt(2.0) atol=atol rtol=rtol
+            @test d1 <= atol
+            @test d2 <= atol
 
-        @test MOI.canget(instance, MOI.ConstraintDual(), rsoc)
-        vardual = MOI.get(instance, MOI.ConstraintDual(), rsoc)
+            @test MOI.canget(instance, MOI.ConstraintDual(), rsoc)
+            vardual = MOI.get(instance, MOI.ConstraintDual(), rsoc)
 
-        @test vardual ≈ (c - A'd) atol=atol rtol=rtol
-        @test 2*vardual[1]*vardual[2] ≥ vardual[3]^2 + vardual[4]^2 - atol
+            @test vardual ≈ (c - A'd) atol=atol rtol=rtol
+            @test 2*vardual[1]*vardual[2] ≥ vardual[3]^2 + vardual[4]^2 - atol
+        end
     end
 end
 
@@ -762,37 +788,39 @@ function rotatedsoc1atest(solver::Function, config::TestConfig)
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(x, [-1.0,-1.0], 0.0))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-    end
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
 
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -sqrt(2.0) atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -sqrt(2.0) atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.VariablePrimal(), x)
-    @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ [1.0/sqrt(2.0), 1.0/sqrt(2.0)] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.VariablePrimal(), x)
+        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ [1.0/sqrt(2.0), 1.0/sqrt(2.0)] atol=atol rtol=rtol
 
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus(1))
-        @test MOI.get(instance, MOI.DualStatus(1)) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus(1))
+            @test MOI.get(instance, MOI.DualStatus(1)) == MOI.FeasiblePoint
 
-        @test MOI.canget(instance, MOI.ConstraintPrimal(), rsoc)
-        @test MOI.get(instance, MOI.ConstraintPrimal(), rsoc) ≈ [0.5, 1.0, 1.0/sqrt(2.0), 1.0/sqrt(2.0)] atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ConstraintPrimal(), rsoc)
+            @test MOI.get(instance, MOI.ConstraintPrimal(), rsoc) ≈ [0.5, 1.0, 1.0/sqrt(2.0), 1.0/sqrt(2.0)] atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.ConstraintDual(), rsoc)
-        d = MOI.get(instance, MOI.ConstraintDual(), rsoc)
-        @test 2*d[1]*d[2] ≥ d[3]^2 + d[4]^2 - atol
+            @test MOI.canget(instance, MOI.ConstraintDual(), rsoc)
+            d = MOI.get(instance, MOI.ConstraintDual(), rsoc)
+            @test 2*d[1]*d[2] ≥ d[3]^2 + d[4]^2 - atol
 
-        dualobj = -dot(b, d)
-        @test dualobj ≈ -sqrt(2.0) atol=atol rtol=rtol
+            dualobj = -dot(b, d)
+            @test dualobj ≈ -sqrt(2.0) atol=atol rtol=rtol
+        end
     end
 end
 
@@ -838,33 +866,35 @@ function rotatedsoc2test(solver::Function, config::TestConfig)
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(x,c,0.0))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) in [MOI.Success, MOI.InfeasibleNoResult, MOI.InfeasibleOrUnbounded]
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) in [MOI.Success, MOI.InfeasibleNoResult, MOI.InfeasibleOrUnbounded]
 
-    if MOI.get(instance, MOI.TerminationStatus()) in [MOI.Success, MOI.InfeasibleOrUnbounded] && config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) in [MOI.InfeasibilityCertificate, MOI.NearlyInfeasibilityCertificate]
+        if MOI.get(instance, MOI.TerminationStatus()) in [MOI.Success, MOI.InfeasibleOrUnbounded] && config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) in [MOI.InfeasibilityCertificate, MOI.NearlyInfeasibilityCertificate]
 
-        @test MOI.canget(instance, MOI.ConstraintDual(), vc1)
-        y1 = MOI.get(instance, MOI.ConstraintDual(), vc1)
-        @test y1 < -atol # Should be strictly negative
+            @test MOI.canget(instance, MOI.ConstraintDual(), vc1)
+            y1 = MOI.get(instance, MOI.ConstraintDual(), vc1)
+            @test y1 < -atol # Should be strictly negative
 
-        @test MOI.canget(instance, MOI.ConstraintDual(), vc2)
-        y2 = MOI.get(instance, MOI.ConstraintDual(), vc2)
+            @test MOI.canget(instance, MOI.ConstraintDual(), vc2)
+            y2 = MOI.get(instance, MOI.ConstraintDual(), vc2)
 
-        @test MOI.canget(instance, MOI.ConstraintDual(), vc3)
-        y3 = MOI.get(instance, MOI.ConstraintDual(), vc3)
-        @test y3 > atol # Should be strictly positive
+            @test MOI.canget(instance, MOI.ConstraintDual(), vc3)
+            y3 = MOI.get(instance, MOI.ConstraintDual(), vc3)
+            @test y3 > atol # Should be strictly positive
 
-        y = [y1, y2, y3]
+            y = [y1, y2, y3]
 
-        vardual = MOI.get(instance, MOI.ConstraintDual(), rsoc)
+            vardual = MOI.get(instance, MOI.ConstraintDual(), rsoc)
 
-        @test vardual ≈ -y atol=atol rtol=rtol
-        @test 2*vardual[1]*vardual[2] ≥ vardual[3]^2 - atol
-        @test dot(b,y) > atol
+            @test vardual ≈ -y atol=atol rtol=rtol
+            @test 2*vardual[1]*vardual[2] ≥ vardual[3]^2 - atol
+            @test dot(b,y) > atol
+        end
     end
 end
 
@@ -903,33 +933,35 @@ function _sdp0test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([X[1], X[3]], ones(2), 0.))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-    end
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
 
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 2 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 2 atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.VariablePrimal(), X)
-    @test MOI.get(instance, MOI.VariablePrimal(), X) ≈ [1, s, 1] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.VariablePrimal(), X)
+        @test MOI.get(instance, MOI.VariablePrimal(), X) ≈ [1, s, 1] atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.ConstraintPrimal(), cX)
-    @test MOI.get(instance, MOI.ConstraintPrimal(), cX) ≈ [1, s, 1] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), cX)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), cX) ≈ [1, s, 1] atol=atol rtol=rtol
 
-    if config.duals
-        @test MOI.canget(instance, MOI.ConstraintDual(), c)
-        @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ 2 atol=atol rtol=rtol
+        if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ 2 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.ConstraintDual(), cX)
-        @test MOI.get(instance, MOI.ConstraintDual(), cX) ≈ [1, -s, 1] atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ConstraintDual(), cX)
+            @test MOI.get(instance, MOI.ConstraintDual(), cX) ≈ [1, -s, 1] atol=atol rtol=rtol
+        end
     end
 end
 
@@ -991,65 +1023,67 @@ function _sdp1test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}()) == 2
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorOfVariables, MOI.SecondOrderCone}()) == 1
 
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-    end
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
 
-    @test MOI.canget(instance, MOI.ObjectiveValue())
-    @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 0.705710509 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 0.705710509 atol=atol rtol=rtol
 
-    @test MOI.canget(instance, MOI.VariablePrimal(), X)
-    Xv = MOI.get(instance, MOI.VariablePrimal(), X)
-    @test MOI.canget(instance, MOI.VariablePrimal(), x)
-    xv = MOI.get(instance, MOI.VariablePrimal(), x)
+        @test MOI.canget(instance, MOI.VariablePrimal(), X)
+        Xv = MOI.get(instance, MOI.VariablePrimal(), X)
+        @test MOI.canget(instance, MOI.VariablePrimal(), x)
+        xv = MOI.get(instance, MOI.VariablePrimal(), x)
 
-    @test MOI.get(instance, MOI.ConstraintPrimal(), cX) ≈ Xv atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.ConstraintPrimal(), cx) ≈ xv atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.ConstraintPrimal(), c1) ≈ Xv[1]+Xv[3]+Xv[6]+xv[1] atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.ConstraintPrimal(), c2) ≈ Xv[1]+2Xv[2]/s+Xv[3]+2Xv[4]/s+2Xv[5]/s+Xv[6]+xv[2]+xv[3] atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.ConstraintPrimal(), cX) ≈ Xv atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.ConstraintPrimal(), cx) ≈ xv atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c1) ≈ Xv[1]+Xv[3]+Xv[6]+xv[1] atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c2) ≈ Xv[1]+2Xv[2]/s+Xv[3]+2Xv[4]/s+2Xv[5]/s+Xv[6]+xv[2]+xv[3] atol=atol rtol=rtol
 
-    if config.duals
-        @test MOI.canget(instance, MOI.ConstraintDual(), c1)
-        y1 = MOI.get(instance, MOI.ConstraintDual(), c1)
-        @test MOI.canget(instance, MOI.ConstraintDual(), c2)
-        y2 = MOI.get(instance, MOI.ConstraintDual(), c2)
+        if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), c1)
+            y1 = MOI.get(instance, MOI.ConstraintDual(), c1)
+            @test MOI.canget(instance, MOI.ConstraintDual(), c2)
+            y2 = MOI.get(instance, MOI.ConstraintDual(), c2)
 
-        #     X11  X21  X22  X31  X32  X33  x1  x2  x3
-        c = [   2, 2/s,   2,   0, 2/s,   2,  1,  0,  0]
-        b = [1, 1/2]
-        # Check primal objective
-        comp_pobj = dot(c, [Xv; xv])
-        # Check dual objective
-        comp_dobj = dot([y1, y2], b)
-        @test comp_pobj ≈ comp_dobj atol=atol rtol=rtol
+            #     X11  X21  X22  X31  X32  X33  x1  x2  x3
+            c = [   2, 2/s,   2,   0, 2/s,   2,  1,  0,  0]
+            b = [1, 1/2]
+            # Check primal objective
+            comp_pobj = dot(c, [Xv; xv])
+            # Check dual objective
+            comp_dobj = dot([y1, y2], b)
+            @test comp_pobj ≈ comp_dobj atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.ConstraintDual(), cX)
-        Xdv = MOI.get(instance, MOI.ConstraintDual(), cX)
-        Xd = [Xdv[1]   Xdv[2]/s Xdv[4]/s;
-              Xdv[2]/s Xdv[3]   Xdv[5]/s;
-              Xdv[4]/s Xdv[5]/s Xdv[6]]
+            @test MOI.canget(instance, MOI.ConstraintDual(), cX)
+            Xdv = MOI.get(instance, MOI.ConstraintDual(), cX)
+            Xd = [Xdv[1]   Xdv[2]/s Xdv[4]/s;
+                  Xdv[2]/s Xdv[3]   Xdv[5]/s;
+                  Xdv[4]/s Xdv[5]/s Xdv[6]]
 
-        C = [2 1 0;
-             1 2 1;
-             0 1 2]
-        A1 = [1 0 0;
-              0 1 0;
-              0 0 1]
-        A2 = [1 1 1;
-              1 1 1;
-              1 1 1]
+            C = [2 1 0;
+                 1 2 1;
+                 0 1 2]
+            A1 = [1 0 0;
+                  0 1 0;
+                  0 0 1]
+            A2 = [1 1 1;
+                  1 1 1;
+                  1 1 1]
 
-        @test C ≈ y1 * A1 + y2 * A2 + Xd atol=atol rtol=rtol
+            @test C ≈ y1 * A1 + y2 * A2 + Xd atol=atol rtol=rtol
 
-        @test eigmin(Xd) > -max(atol, rtol)
+            @test eigmin(Xd) > -max(atol, rtol)
+        end
     end
 end
 
@@ -1094,62 +1128,64 @@ function sdp2test(solver::Function, config::TestConfig)
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([x[7]], [1.], 0.))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
-    MOI.optimize!(instance)
+    if config.solve
+        MOI.optimize!(instance)
 
-    @test MOI.canget(instance, MOI.TerminationStatus())
-    @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-    @test MOI.canget(instance, MOI.PrimalStatus())
-    @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-    if config.duals
-        @test MOI.canget(instance, MOI.DualStatus())
-        @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-    end
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
 
-    @test MOI.canget(instance, MOI.VariablePrimal(), x)
-    xv = MOI.get(instance, MOI.VariablePrimal(), x)
-    @test all(xv[1:6] .> -atol)
+        @test MOI.canget(instance, MOI.VariablePrimal(), x)
+        xv = MOI.get(instance, MOI.VariablePrimal(), x)
+        @test all(xv[1:6] .> -atol)
 
-    con = A * xv + b
+        con = A * xv + b
 
-    @test MOI.canget(instance, MOI.ConstraintPrimal(), c1)
-    @test MOI.get(instance, MOI.ConstraintPrimal(), c1) ≈ con[1] atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.ConstraintPrimal(), c1) ≈ 0.0 atol=atol rtol=rtol
-    @test MOI.canget(instance, MOI.ConstraintPrimal(), c2)
-    @test MOI.get(instance, MOI.ConstraintPrimal(), c2) ≈ con[2:7] atol=atol rtol=rtol
-    @test all(MOI.get(instance, MOI.ConstraintPrimal(), c2) .< atol)
-    @test MOI.canget(instance, MOI.ConstraintPrimal(), c3)
-    Xv = MOI.get(instance, MOI.ConstraintPrimal(), c3)
-    @test Xv ≈ con[8:10] atol=atol rtol=rtol
-    s2 = sqrt(2)
-    Xm = [Xv[1]    Xv[2]/s2
-          Xv[2]/s2 Xv[3]]
-    @test eigmin(Xm) > -atol
-    @test MOI.canget(instance, MOI.ConstraintPrimal(), c4)
-    @test MOI.get(instance, MOI.ConstraintPrimal(), c4) ≈ con[11] atol=atol rtol=rtol
-    @test MOI.get(instance, MOI.ConstraintPrimal(), c4) ≈ 0.0 atol=atol rtol=rtol
-
-    if config.duals
-        @test MOI.canget(instance, MOI.ConstraintDual(), c1)
-        y1 = MOI.get(instance, MOI.ConstraintDual(), c1)
-        @test y1 > -atol
-        @test MOI.canget(instance, MOI.ConstraintDual(), c2)
-        y2 = MOI.get(instance, MOI.ConstraintDual(), c2)
-        @test all(MOI.get(instance, MOI.ConstraintDual(), c2) .< atol)
-
-        @test MOI.canget(instance, MOI.ConstraintDual(), c3)
-        y3 = MOI.get(instance, MOI.ConstraintDual(), c3)
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), c1)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c1) ≈ con[1] atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c1) ≈ 0.0 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), c2)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c2) ≈ con[2:7] atol=atol rtol=rtol
+        @test all(MOI.get(instance, MOI.ConstraintPrimal(), c2) .< atol)
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), c3)
+        Xv = MOI.get(instance, MOI.ConstraintPrimal(), c3)
+        @test Xv ≈ con[8:10] atol=atol rtol=rtol
         s2 = sqrt(2)
-        Ym = [y3[1]    y3[2]/s2
-              y3[2]/s2 y3[3]]
-        @test eigmin(Ym) > -atol
+        Xm = [Xv[1]    Xv[2]/s2
+              Xv[2]/s2 Xv[3]]
+        @test eigmin(Xm) > -atol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), c4)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c4) ≈ con[11] atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c4) ≈ 0.0 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.ConstraintDual(), c4)
-        y4 = MOI.get(instance, MOI.ConstraintDual(), c4)
+        if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), c1)
+            y1 = MOI.get(instance, MOI.ConstraintDual(), c1)
+            @test y1 > -atol
+            @test MOI.canget(instance, MOI.ConstraintDual(), c2)
+            y2 = MOI.get(instance, MOI.ConstraintDual(), c2)
+            @test all(MOI.get(instance, MOI.ConstraintDual(), c2) .< atol)
 
-        y = [y1; y2; y3; y4]
-        @test dot(c, xv) ≈ dot(b, y) atol=atol rtol=rtol
-        @test A' * y ≈ -c atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ConstraintDual(), c3)
+            y3 = MOI.get(instance, MOI.ConstraintDual(), c3)
+            s2 = sqrt(2)
+            Ym = [y3[1]    y3[2]/s2
+                  y3[2]/s2 y3[3]]
+            @test eigmin(Ym) > -atol
+
+            @test MOI.canget(instance, MOI.ConstraintDual(), c4)
+            y4 = MOI.get(instance, MOI.ConstraintDual(), c4)
+
+            y = [y1; y2; y3; y4]
+            @test dot(c, xv) ≈ dot(b, y) atol=atol rtol=rtol
+            @test A' * y ≈ -c atol=atol rtol=rtol
+        end
     end
 end
 
