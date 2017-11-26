@@ -238,18 +238,20 @@ function linear1test(solver::Function, config::TestConfig)
 
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 1 atol=atol rtol=rtol
+    end
 
-        # modify affine linear constraint set to be == 2 to get :
-        # max x + 2z
-        # s.t. x + y + z == 2
-        # x,y >= 0, z = 0
-        @test MOI.candelete(instance, c)
-        MOI.delete!(instance, c)
-        cf = MOI.ScalarAffineFunction(v, [1.0,1.0,1.0], 0.0)
-        c = MOI.addconstraint!(instance, cf, MOI.EqualTo(2.0))
-        @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}()) == 0
-        @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.EqualTo{Float64}}()) == 1
+    # modify affine linear constraint set to be == 2 to get :
+    # max x + 2z
+    # s.t. x + y + z == 2
+    # x,y >= 0, z = 0
+    @test MOI.candelete(instance, c)
+    MOI.delete!(instance, c)
+    cf = MOI.ScalarAffineFunction(v, [1.0,1.0,1.0], 0.0)
+    c = MOI.addconstraint!(instance, cf, MOI.EqualTo(2.0))
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}()) == 0
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.EqualTo{Float64}}()) == 1
 
+    if config.solve
         MOI.optimize!(instance)
 
         @test MOI.canget(instance, MOI.TerminationStatus())
