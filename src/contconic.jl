@@ -984,8 +984,6 @@ geomeantests = Dict("geomean1v" => geomean1vtest,
 function _sdp0test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    scaled = sdpcone == MOI.PositiveSemidefiniteConeScaled
-    s = scaled ? sqrt(2) : 1
     #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}), (MOI.VectorOfVariables, sdpcone)])
     # min X[1,1] + X[2,2]    max y
     #     X[2,1] = 1         [0   y/2     [ 1  0
@@ -1003,7 +1001,7 @@ function _sdp0test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
         cX = MOI.addconstraint!(instance, MOI.VectorAffineFunction(collect(1:3), X, ones(3), zeros(3)), sdpcone(2))
     end
 
-    c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([X[2]], [1/s], 0.), MOI.EqualTo(1.))
+    c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([X[2]], [1.], 0.), MOI.EqualTo(1.))
 
     @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64}, sdpcone}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}()) == 1
@@ -1027,17 +1025,17 @@ function _sdp0test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 2 atol=atol rtol=rtol
 
         @test MOI.canget(instance, MOI.VariablePrimal(), X)
-        @test MOI.get(instance, MOI.VariablePrimal(), X) ≈ [1, s, 1] atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), X) ≈ [1, 1, 1] atol=atol rtol=rtol
 
         @test MOI.canget(instance, MOI.ConstraintPrimal(), cX)
-        @test MOI.get(instance, MOI.ConstraintPrimal(), cX) ≈ [1, s, 1] atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.ConstraintPrimal(), cX) ≈ [1, 1, 1] atol=atol rtol=rtol
 
         if config.duals
             @test MOI.canget(instance, MOI.ConstraintDual(), c)
             @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ 2 atol=atol rtol=rtol
 
             @test MOI.canget(instance, MOI.ConstraintDual(), cX)
-            @test MOI.get(instance, MOI.ConstraintDual(), cX) ≈ [1, -s, 1] atol=atol rtol=rtol
+            @test MOI.get(instance, MOI.ConstraintDual(), cX) ≈ [1, -1, 1] atol=atol rtol=rtol
         end
     end
 end
@@ -1046,8 +1044,6 @@ end
 function _sdp1test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    scaled = sdpcone == MOI.PositiveSemidefiniteConeScaled
-    s = scaled ? sqrt(2) : 1.
     #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}), (MOI.VectorOfVariables, sdpcone), (MOI.VectorOfVariables, MOI.SecondOrderCone)])
     # Problem SDP1 - sdo1 from MOSEK docs
     # From Mosek.jl/test/mathprogtestextra.jl, under license:
@@ -1091,9 +1087,9 @@ function _sdp1test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
     cx = MOI.addconstraint!(instance, MOI.VectorOfVariables(x), MOI.SecondOrderCone(3))
 
     c1 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([X[1], X[3], X[6], x[1]], [1., 1, 1, 1], 0.), MOI.EqualTo(1.))
-    c2 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([X; x[2]; x[3]], [1., 2/s, 1, 2/s, 2/s, 1, 1, 1], 0.), MOI.EqualTo(1/2))
+    c2 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([X; x[2]; x[3]], [1., 2, 1, 2, 2, 1, 1, 1], 0.), MOI.EqualTo(1/2))
 
-    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([X[1:3]; X[5:6]; x[1]], [2., 2/s, 2, 2/s, 2, 1], 0.))
+    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([X[1:3]; X[5:6]; x[1]], [2., 2, 2, 2, 2, 1], 0.))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
 
     @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64}, sdpcone}()) == 1
@@ -1124,7 +1120,7 @@ function _sdp1test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
         @test MOI.get(instance, MOI.ConstraintPrimal(), cX) ≈ Xv atol=atol rtol=rtol
         @test MOI.get(instance, MOI.ConstraintPrimal(), cx) ≈ xv atol=atol rtol=rtol
         @test MOI.get(instance, MOI.ConstraintPrimal(), c1) ≈ Xv[1]+Xv[3]+Xv[6]+xv[1] atol=atol rtol=rtol
-        @test MOI.get(instance, MOI.ConstraintPrimal(), c2) ≈ Xv[1]+2Xv[2]/s+Xv[3]+2Xv[4]/s+2Xv[5]/s+Xv[6]+xv[2]+xv[3] atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c2) ≈ Xv[1]+2Xv[2]+Xv[3]+2Xv[4]+2Xv[5]+Xv[6]+xv[2]+xv[3] atol=atol rtol=rtol
 
         if config.duals
             @test MOI.canget(instance, MOI.ConstraintDual(), c1)
@@ -1133,7 +1129,7 @@ function _sdp1test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
             y2 = MOI.get(instance, MOI.ConstraintDual(), c2)
 
             #     X11  X21  X22  X31  X32  X33  x1  x2  x3
-            c = [   2, 2/s,   2,   0, 2/s,   2,  1,  0,  0]
+            c = [   2,   2,   2,   0,   2,   2,  1,  0,  0]
             b = [1, 1/2]
             # Check primal objective
             comp_pobj = dot(c, [Xv; xv])
@@ -1143,9 +1139,9 @@ function _sdp1test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
 
             @test MOI.canget(instance, MOI.ConstraintDual(), cX)
             Xdv = MOI.get(instance, MOI.ConstraintDual(), cX)
-            Xd = [Xdv[1]   Xdv[2]/s Xdv[4]/s;
-                  Xdv[2]/s Xdv[3]   Xdv[5]/s;
-                  Xdv[4]/s Xdv[5]/s Xdv[6]]
+            Xd = [Xdv[1] Xdv[2] Xdv[4];
+                  Xdv[2] Xdv[3] Xdv[5];
+                  Xdv[4] Xdv[5] Xdv[6]]
 
             C = [2 1 0;
                  1 2 1;
@@ -1166,17 +1162,13 @@ end
 
 sdp0tvtest(solver::Function, config::TestConfig) = _sdp0test(solver, true, MOI.PositiveSemidefiniteConeTriangle, config)
 sdp0tftest(solver::Function, config::TestConfig) = _sdp0test(solver, false, MOI.PositiveSemidefiniteConeTriangle, config)
-sdp0svtest(solver::Function, config::TestConfig) = _sdp0test(solver, true, MOI.PositiveSemidefiniteConeScaled, config)
-sdp0sftest(solver::Function, config::TestConfig) = _sdp0test(solver, false, MOI.PositiveSemidefiniteConeScaled, config)
 sdp1tvtest(solver::Function, config::TestConfig) = _sdp1test(solver, true, MOI.PositiveSemidefiniteConeTriangle, config)
 sdp1tftest(solver::Function, config::TestConfig) = _sdp1test(solver, false, MOI.PositiveSemidefiniteConeTriangle, config)
-sdp1svtest(solver::Function, config::TestConfig) = _sdp1test(solver, true, MOI.PositiveSemidefiniteConeScaled, config)
-sdp1sftest(solver::Function, config::TestConfig) = _sdp1test(solver, false, MOI.PositiveSemidefiniteConeScaled, config)
 
 function sdp2test(solver::Function, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
-    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}), (MOI.VectorOfVariables, MOI.PositiveSemidefiniteConeScaled)])
+    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}), (MOI.VectorOfVariables, MOI.PositiveSemidefiniteConeTriangle)])
     # Caused getdual to fail on SCS and Mosek
     instance = solver()
 
@@ -1185,9 +1177,9 @@ function sdp2test(solver::Function, config::TestConfig)
 
     c = [0.0,0.0,0.0,0.0,0.0,0.0,1.0]
     b = [10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
-    I = [1,2,8,9,10,11,1,3,8,9,10,11,1,4,8,9,10,11,1,5,8,1,6,8,9,10,11,1,7,8,9,10,11,8,10]
-    J = [1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,3,4,4,4,5,5,5,5,5,5,6,6,6,6,6,6,7,7]
-    V = -[1.0,1.0,-0.44999999999999996,0.45000000000000007,-0.4500000000000001,0.0,1.0,1.0,-0.7681980515339464,0.31819805153394654,-0.13180194846605373,0.0,1.0,1.0,-0.9000000000000001,0.0,0.0,0.0,1.0,1.0,-0.22500000000000003,1.0,1.0,-0.11250000000000003,0.1125,-0.11249999999999999,0.0,1.0,1.0,0.0,0.0,-0.22500000000000003,0.0,1.0,1.0]
+    I =  [1,  2,   8,   9,           10,  11,  1,  3,   8,                 9,                  10,                 11,  1,  4,   8,  9,  10, 11, 1,  5,   8,    1,  6,   8,     9,             10,    11,  1,  7,  8,  9, 10,  11,    8, 10]
+    J =  [1,  1,   1,   1,            1,   1,  2,  2,   2,                 2,                   2,                  2,  3,  3,   3,  3,  3,  3,  4,  4,   4,    5,  5,   5,     5,              5,     5,  6,  6,  6,  6,  6,   6,    7,  7]
+    V = -[1.0,1.0,-0.45,0.45/sqrt(2),-0.45,0.0,1.0,1.0,-0.7681980515339464,0.225,-0.13180194846605373,0.0,1.0,1.0,-0.9,0.0,0.0,0.0,1.0,1.0,-0.225,1.0,1.0,-0.1125,0.1125/sqrt(2),-0.1125,0.0,1.0,1.0,0.0,0.0,-0.225,0.0,1.0,1.0]
 
     A = sparse(I, J, V, length(b), length(c))
 
@@ -1195,12 +1187,12 @@ function sdp2test(solver::Function, config::TestConfig)
 
     c1 = MOI.addconstraint!(instance, MOIU.eachscalar(f)[1], MOI.GreaterThan(0.0))
     c2 = MOI.addconstraint!(instance, MOIU.eachscalar(f)[2:7], MOI.Nonpositives(6))
-    c3 = MOI.addconstraint!(instance, MOIU.eachscalar(f)[8:10], MOI.PositiveSemidefiniteConeScaled(2))
+    c3 = MOI.addconstraint!(instance, MOIU.eachscalar(f)[8:10], MOI.PositiveSemidefiniteConeTriangle(2))
     c4 = MOI.addconstraint!(instance, MOIU.eachscalar(f)[11], MOI.EqualTo(0.))
 
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.Nonpositives}()) == 1
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.PositiveSemidefiniteConeScaled}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.PositiveSemidefiniteConeTriangle}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}()) == 1
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([x[7]], [1.], 0.))
@@ -1261,6 +1253,7 @@ function sdp2test(solver::Function, config::TestConfig)
 
             y = [y1; y2; y3; y4]
             @test dot(c, xv) ≈ dot(b, y) atol=atol rtol=rtol
+            A[9,:] *= 2 # See duality note for PositiveSemidefiniteConeTriangle, 9 correspond to a off-diagonal entry
             @test A' * y ≈ -c atol=atol rtol=rtol
         end
     end
@@ -1268,12 +1261,8 @@ end
 
 const sdptests = Dict("sdp0tv" => sdp0tvtest,
                       "sdp0tf" => sdp0tftest,
-                      "sdp0sv" => sdp0svtest,
-                      "sdp0sf" => sdp0sftest,
                       "sdp1tv" => sdp1tvtest,
                       "sdp1tf" => sdp1tftest,
-                      "sdp1sv" => sdp1svtest,
-                      "sdp1sf" => sdp1sftest,
                       "sdp2"   => sdp2test)
 
 @moitestset sdp
@@ -1282,7 +1271,7 @@ function _det1test(solver::Function, config::TestConfig, vecofvars::Bool, detcon
     atol = config.atol
     rtol = config.rtol
     square = detcone == MOI.LogDetConeSquare || detcone == MOI.RootDetConeSquare
-    logdet = detcone == MOI.LogDetConeTriangle || detcone == MOI.LogDetConeScaled || detcone == MOI.LogDetConeSquare
+    logdet = detcone == MOI.LogDetConeTriangle || detcone == MOI.LogDetConeSquare
     # We look for an ellipsoid x^T P x ≤ 1 contained in the square.
     # Let Q = inv(P) (x^T Q x ≤ 1 is its polar ellipsoid), we have
     # max t
@@ -1346,25 +1335,17 @@ end
 
 logdet1tvtest(solver::Function, config::TestConfig) = _det1test(solver, config, true, MOI.LogDetConeTriangle)
 logdet1tftest(solver::Function, config::TestConfig) = _det1test(solver, config, false, MOI.LogDetConeTriangle)
-logdet1qvtest(solver::Function, config::TestConfig) = _det1test(solver, config, true, MOI.LogDetConeSquare)
-logdet1qftest(solver::Function, config::TestConfig) = _det1test(solver, config, false, MOI.LogDetConeSquare)
 
 const logdettests = Dict("logdet1tv" => logdet1tvtest,
-                         "logdet1tf" => logdet1tftest,
-                         "logdet1qv" => logdet1qvtest,
-                         "logdet1qf" => logdet1qftest)
+                         "logdet1tf" => logdet1tftest)
 
 @moitestset logdet
 
 rootdet1tvtest(solver::Function, config::TestConfig) = _det1test(solver, config, true, MOI.RootDetConeTriangle)
 rootdet1tftest(solver::Function, config::TestConfig) = _det1test(solver, config, false, MOI.RootDetConeTriangle)
-rootdet1qvtest(solver::Function, config::TestConfig) = _det1test(solver, config, true, MOI.RootDetConeSquare)
-rootdet1qftest(solver::Function, config::TestConfig) = _det1test(solver, config, false, MOI.RootDetConeSquare)
 
 const rootdettests = Dict("rootdet1tv" => rootdet1tvtest,
-                          "rootdet1tf" => rootdet1tftest,
-                          "rootdet1qv" => rootdet1qvtest,
-                          "rootdet1qf" => rootdet1qftest)
+                          "rootdet1tf" => rootdet1tftest)
 
 @moitestset rootdet
 
