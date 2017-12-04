@@ -1116,8 +1116,13 @@ function _sdp1test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
 
         @test MOI.canget(instance, MOI.VariablePrimal(), X)
         Xv = MOI.get(instance, MOI.VariablePrimal(), X)
+        Xp = [Xv[1] Xv[2] Xv[4]
+              Xv[2] Xv[3] Xv[5]
+              Xv[4] Xv[5] Xv[6]]
+        @test eigmin(Xp) > -atol
         @test MOI.canget(instance, MOI.VariablePrimal(), x)
         xv = MOI.get(instance, MOI.VariablePrimal(), x)
+        @test xv[2]^2 + xv[3]^2 - xv[1]^2 < atol
 
         @test MOI.get(instance, MOI.ConstraintPrimal(), cX) ≈ Xv atol=atol rtol=rtol
         @test MOI.get(instance, MOI.ConstraintPrimal(), cx) ≈ xv atol=atol rtol=rtol
@@ -1157,7 +1162,7 @@ function _sdp1test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
 
             @test C ≈ y1 * A1 + y2 * A2 + Xd atol=atol rtol=rtol
 
-            @test eigmin(Xd) > -max(atol, rtol)
+            @test eigmin(Xd) > -atol
         end
     end
 end
