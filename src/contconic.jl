@@ -604,7 +604,9 @@ function soc3test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.TerminationStatus())
         @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
 
-        @test !MOI.canget(instance, MOI.PrimalStatus())
+        if MOI.canget(instance, MOI.PrimalStatus())
+            @test MOI.get(instance, MOI.PrimalStatus()) == MOI.InfeasiblePoint
+        end
         if config.duals
             @test MOI.canget(instance, MOI.DualStatus())
             @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
