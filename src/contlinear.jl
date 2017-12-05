@@ -1134,7 +1134,7 @@ function linear11test(solver::Function, config::TestConfig)
     @test MOI.cantransformconstraint(instance, c2, MOI.LessThan(2.0))
     c3 = MOI.transformconstraint!(instance, c2, MOI.LessThan(2.0))
 
-    @test isa(c3, MOI.ConstraintReference{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}})
+    @test isa(c3, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}})
     @test MOI.isvalid(instance, c2) == false
     @test MOI.isvalid(instance, c3) == true
 
