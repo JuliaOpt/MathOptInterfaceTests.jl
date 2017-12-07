@@ -1113,6 +1113,7 @@ function exp2test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ConstraintDual(), c5)
             d5 = MOI.get(instance, MOI.ConstraintDual(), c5) # degree of freedom
             d23 = (exp(-0.3)*0.3 - d5) / 0.6 # dual constraint corresponding to v[7]
+            @test d23 >= -atol
             @test MOI.canget(instance, MOI.ConstraintDual(), c2)
             @test MOI.get(instance, MOI.ConstraintDual(), c2) ≈ [d23, exp(-0.3), exp(-0.3)/2] atol=atol rtol=rtol
             @test MOI.canget(instance, MOI.ConstraintDual(), c3)
