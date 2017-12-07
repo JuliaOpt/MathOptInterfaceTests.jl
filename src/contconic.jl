@@ -983,6 +983,75 @@ geomeantests = Dict("geomean1v" => geomean1vtest,
 
 @moitestset geomean
 
+function _exp1test(solver::Function, config::TestConfig, vecofvars::Bool)
+    atol = config.atol
+    rtol = config.rtol
+    # Problem EXP1 - ExpPrimal
+    # min x + y + z
+    #  st  y e^(x/y) <= z, y > 0 (i.e (x, y, z) are in the exponential primal cone)
+    #      x == 1
+    #      y == 2
+
+    instance = solver()
+
+    v = MOI.addvariables!(instance, 3)
+    @test MOI.get(instance, MOI.NumberOfVariables()) == 3
+
+    vov = MOI.VectorOfVariables(v)
+    if vecofvars
+        vc = MOI.addconstraint!(instance, vov, MOI.ExponentialCone())
+    else
+        vc = MOI.addconstraint!(instance, MOI.VectorAffineFunction{Float64}(vov), MOI.ExponentialCone())
+    end
+
+    cx = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([v[1]], [1.], 0.), MOI.EqualTo(1.))
+    cy = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([v[2]], [1.], 0.), MOI.EqualTo(2.))
+
+    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(v, ones(3), 0.0))
+    MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
+
+    if config.solve
+        MOI.optimize!(instance)
+
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
+
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 3 + 2exp(1/2) atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.VariablePrimal(), v)
+        @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1., 2., 2exp(1/2)] atol=atol rtol=rtol
+
+        if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), vc)
+            u, v, w = MOI.get(instance, MOI.ConstraintDual(), vc)
+            @test u < -atol
+            @test -u*exp(v/u) ≤ exp(1)*w + atol
+
+            @test MOI.canget(instance, MOI.ConstraintDual(), cx)
+            dx = MOI.get(instance, MOI.ConstraintDual(), cx)
+            @test MOI.canget(instance, MOI.ConstraintDual(), cy)
+            dy = MOI.get(instance, MOI.ConstraintDual(), cy)
+
+            @test [u + dx, v + dy, w] ≈ ones(3) atol=atol rtol=rtol
+        end
+    end
+end
+
+exp1vtest(solver::Function, config::TestConfig) = _exp1test(solver, config, true)
+exp1ftest(solver::Function, config::TestConfig) = _exp1test(solver, config, false)
+
+exptests = Dict("exp1v" => exp1vtest,
+                "exp1f" => exp1ftest)
+
+@moitestset exp
+
 function _sdp0test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfig)
     atol = config.atol
     rtol = config.rtol
@@ -1359,8 +1428,9 @@ const rootdettests = Dict("rootdet1tv" => rootdet1tvtest,
 const contconictests = Dict("lin" => lintest,
                             "soc" => soctest,
                             "rsoc" => rsoctest,
-                            "sdp" => sdptest,
                             "geomean" => geomeantest,
+                            "exp" => exptest,
+                            "sdp" => sdptest,
                             "logdet" => logdettest,
                             "rootdet" => rootdettest)
 
