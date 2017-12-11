@@ -54,3 +54,21 @@ function nametest(instance::MOI.AbstractInstance)
         # TODO: Test for error when duplicate names are assigned
     end
 end
+
+# Taken from https://github.com/JuliaOpt/MathOptInterfaceUtilities.jl/issues/41
+function validtest(instance::MOI.AbstractInstance)
+    v = MOI.addvariables!(instance, 2)
+    @test MOI.isvalid(instance, v[1])
+    @test MOI.isvalid(instance, v[2])
+    x = MOI.addvariable!(instance)
+    @test MOI.isvalid(instance, x)
+    MOI.delete!(instance, x)
+    @test !MOI.isvalid(instance, x)
+    cf = MOI.ScalarAffineFunction(v, [1.0,1.0], 0.0)
+    c = MOI.addconstraint!(instance, cf, MOI.LessThan(1.0))
+    @test MOI.isvalid(instance, c)
+    @test !MOI.isvalid(instance, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float32},MOI.LessThan{Float32}}(1))
+    @test !MOI.isvalid(instance, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float32},MOI.LessThan{Float64}}(1))
+    @test !MOI.isvalid(instance, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float32}}(1))
+    @test !MOI.isvalid(instance, MOI.ConstraintIndex{MOI.VectorQuadraticFunction{Float64},MOI.SecondOrderCone}(1))
+end
