@@ -1028,18 +1028,25 @@ function _exp1test(solver::Function, config::TestConfig, vecofvars::Bool)
         @test MOI.canget(instance, MOI.VariablePrimal(), v)
         @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1., 2., 2exp(1/2)] atol=atol rtol=rtol
 
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), vc)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), vc) ≈ [1., 2., 2exp(1/2)] atol=atol rtol=rtol
+
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), cx)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), cx) ≈ 1 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), cy)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), cy) ≈ 2 atol=atol rtol=rtol
+
         if config.duals
             @test MOI.canget(instance, MOI.ConstraintDual(), vc)
             u, v, w = MOI.get(instance, MOI.ConstraintDual(), vc)
-            @test u < -atol
-            @test -u*exp(v/u) ≤ exp(1)*w + atol
+            @test u ≈ -exp(1/2) atol=atol rtol=rtol
+            @test v ≈ -exp(1/2)/2 atol=atol rtol=rtol
+            @test w ≈ 1 atol=atol rtol=rtol
 
             @test MOI.canget(instance, MOI.ConstraintDual(), cx)
-            dx = MOI.get(instance, MOI.ConstraintDual(), cx)
+            @test MOI.get(instance, MOI.ConstraintDual(), cx) ≈ 1 + exp(1/2) atol=atol rtol=rtol
             @test MOI.canget(instance, MOI.ConstraintDual(), cy)
-            dy = MOI.get(instance, MOI.ConstraintDual(), cy)
-
-            @test [u + dx, v + dy, w] ≈ ones(3) atol=atol rtol=rtol
+            @test MOI.get(instance, MOI.ConstraintDual(), cy) ≈ 1 + exp(1/2)/2 atol=atol rtol=rtol
         end
     end
 end
