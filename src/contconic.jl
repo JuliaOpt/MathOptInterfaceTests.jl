@@ -1125,7 +1125,8 @@ function exp2test(solver::Function, config::TestConfig)
 end
 
 exptests = Dict("exp1v" => exp1vtest,
-                "exp1f" => exp1ftest)
+                "exp1f" => exp1ftest,
+                "exp2"  => exp2test)
 
 @moitestset exp
 
