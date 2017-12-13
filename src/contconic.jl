@@ -3,7 +3,7 @@ const MOIU = MathOptInterfaceUtilities
 
 # Continuous conic problems
 
-function lin1test(solver::Function, config::TestConfig)
+function _lin1test(solver::Function, config::TestConfig, vecofvars::Bool)
     atol = config.atol
     rtol = config.rtol
     #@test MOI.supportsproblem(solver,
@@ -26,13 +26,19 @@ function lin1test(solver::Function, config::TestConfig)
     v = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
-    vc = MOI.addconstraint!(instance, MOI.VectorOfVariables(v), MOI.Nonnegatives(3))
+    vov = MOI.VectorOfVariables(v)
+    if vecofvars
+        vc = MOI.addconstraint!(instance, vov, MOI.Nonnegatives(3))
+    else
+        vc = MOI.addconstraint!(instance, MOI.VectorAffineFunction{Float64}(vov), MOI.Nonnegatives(3))
+    end
+
     c = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,1,2,2], [v;v[2];v[3]], ones(5), [-3.0,-2.0]), MOI.Zeros(2))
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorOfVariables,MOI.Nonnegatives}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64},MOI.Nonnegatives}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 1
     loc = MOI.get(instance, MOI.ListOfConstraints())
     @test length(loc) == 2
-    @test (MOI.VectorOfVariables,MOI.Nonnegatives) in loc
+    @test (vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64},MOI.Nonnegatives) in loc
     @test (MOI.VectorAffineFunction{Float64},MOI.Zeros) in loc
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(v, [-3.0, -2.0, -4.0], 0.0))
@@ -57,66 +63,22 @@ function lin1test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.VariablePrimal(), v)
         @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 0, 2] atol=atol rtol=rtol
 
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), vc)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), vc) ≈ [1, 0, 2] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), c)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c) ≈ zeros(2) atol=atol rtol=rtol
+
         if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), vc)
+            @test MOI.get(instance, MOI.ConstraintDual(), vc) ≈ [0, 2, 0] atol=atol rtol=rtol
             @test MOI.canget(instance, MOI.ConstraintDual(), c)
             @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [-3, -1] atol=atol rtol=rtol
         end
-
-        # TODO var dual and con primal
     end
 end
 
-function lin1atest(solver::Function, config::TestConfig)
-    atol = config.atol
-    rtol = config.rtol
-    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
-    #[
-    #    (MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),
-    #    (MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),
-    #    (MOI.VectorAffineFunction{Float64},MOI.Zeros)
-    #])
-    # Same as LIN1 but variable bounds enforced with VectorAffineFunction
-
-    instance = solver()
-
-    v = MOI.addvariables!(instance, 3)
-    @test MOI.get(instance, MOI.NumberOfVariables()) == 3
-
-    vc = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,2,3], v, ones(3), zeros(3)), MOI.Nonnegatives(3))
-    c = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,1,2,2], [v;v[2];v[3]], ones(5), [-3.0,-2.0]), MOI.Zeros(2))
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Nonnegatives}()) == 1
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 1
-
-    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(v, [-3.0, -2.0, -4.0], 0.0))
-    MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
-
-    if config.solve
-        MOI.optimize!(instance)
-
-        @test MOI.canget(instance, MOI.TerminationStatus())
-        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
-
-        @test MOI.canget(instance, MOI.PrimalStatus())
-        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-        if config.duals
-            @test MOI.canget(instance, MOI.DualStatus())
-            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-        end
-
-        @test MOI.canget(instance, MOI.ObjectiveValue())
-        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -11 atol=atol rtol=rtol
-
-        @test MOI.canget(instance, MOI.VariablePrimal(), v)
-        @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 0, 2] atol=atol rtol=rtol
-
-        if config.duals
-            @test MOI.canget(instance, MOI.ConstraintDual(), c)
-            @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [-3, -1] atol=atol rtol=rtol
-        end
-
-        # TODO var dual and con primal
-    end
-end
+lin1vtest(solver::Function, config::TestConfig) = _lin1test(solver, config, false)
+lin1ftest(solver::Function, config::TestConfig) = _lin1test(solver, config, false)
 
 function lin2test(solver::Function, config::TestConfig)
     atol = config.atol
@@ -346,8 +308,8 @@ function lin4test(solver::Function, config::TestConfig)
     end
 end
 
-const lintests = Dict("lin1"  => lin1test,
-                      "lin1a" => lin1atest,
+const lintests = Dict("lin1v" => lin1vtest,
+                      "lin1f" => lin1ftest,
                       "lin2"  => lin2test,
                       "lin2a" => lin2atest,
                       "lin3"  => lin3test,
