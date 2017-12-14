@@ -1131,9 +1131,68 @@ function exp2test(solver::Function, config::TestConfig)
     end
 end
 
+function exp3test(solver::Function, config::TestConfig)
+    # Problem EXP3
+    # A problem where ECOS was failing
+    atol = config.atol
+    rtol = config.rtol
+
+    instance = solver()
+
+    x = MOI.addvariable!(instance)
+    y = MOI.addvariable!(instance)
+    @test MOI.get(instance, MOI.NumberOfVariables()) == 2
+
+    xc = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x], [2.], 0.), MOI.LessThan(4.))
+    yc = MOI.addconstraint!(instance, MOI.SingleVariable(y), MOI.LessThan(5.))
+    ec = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1, 3], [x, y], ones(2), [0., 1., 0.]), MOI.ExponentialCone())
+
+    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([x], [1.], 0.0))
+    MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
+
+    if config.solve
+        MOI.optimize!(instance)
+
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
+
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ log(5) atol=atol rtol=rtol
+
+        @test MOI.canget(instance, MOI.VariablePrimal(), x)
+        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ log(5) atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.VariablePrimal(), y)
+        @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 5. atol=atol rtol=rtol
+
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), xc)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), xc) ≈ 2log(5) atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), yc)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), yc) ≈ 5 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), ec)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), ec) ≈ [log(5), 1., 5.] atol=atol rtol=rtol
+
+        if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), xc)
+            @test MOI.get(instance, MOI.ConstraintDual(), xc) ≈ 0. atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ConstraintDual(), yc)
+            @test MOI.get(instance, MOI.ConstraintDual(), yc) ≈ -1/5 atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ConstraintDual(), ec)
+            @test MOI.get(instance, MOI.ConstraintDual(), ec) ≈ [-1., log(5)-1, 1/5] atol=atol rtol=rtol
+        end
+    end
+end
+
 exptests = Dict("exp1v" => exp1vtest,
                 "exp1f" => exp1ftest,
-                "exp2"  => exp2test)
+                "exp2"  => exp2test,
+                "exp3"  => exp3test)
 
 @moitestset exp
 
