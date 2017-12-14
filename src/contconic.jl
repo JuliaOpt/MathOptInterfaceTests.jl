@@ -3,13 +3,13 @@ const MOIU = MathOptInterfaceUtilities
 
 _vovf(vecofvars) = vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64}
 """
-    _addvovconstraint!(instance, v::Vector{MOI.VariableIndex}, set::MOI.AbstractVectorSet, vecofvars::Bool)
+    addvovconstraint!(instance, v::Vector{MOI.VariableIndex}, set::MOI.AbstractVectorSet, vecofvars::Bool)
 
 Add the constraint that the variables `v` should belong to the set `set` in `instance`.
 If `vecofvars` is `true`, this is done using a `VectorOfVariables` function, otherwise it is done using a `VectorAffineFunction{Float64}`.
 This is used to write tests which, depending on the boolean `vecofvars`, creates either `VectorOfVariables` constraints or `VectorAffineFunction` constraints.
 """
-function _addvovconstraint!(instance, v::Vector{MOI.VariableIndex}, set::MOI.AbstractVectorSet, vecofvars::Bool)
+function addvovconstraint!(instance, v::Vector{MOI.VariableIndex}, set::MOI.AbstractVectorSet, vecofvars::Bool)
     vov = MOI.VectorOfVariables(v)
     if vecofvars
         vc = MOI.addconstraint!(instance, vov, set)
@@ -43,7 +43,7 @@ function _lin1test(solver::Function, config::TestConfig, vecofvars::Bool)
     v = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
-    vc = _addvovconstraint!(instance, v, MOI.Nonnegatives(3), vecofvars)
+    vc = addvovconstraint!(instance, v, MOI.Nonnegatives(3), vecofvars)
 
     c = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,1,2,2], [v;v[2];v[3]], ones(5), [-3.0,-2.0]), MOI.Zeros(2))
     @test MOI.get(instance, MOI.NumberOfConstraints{_vovf(vecofvars),MOI.Nonnegatives}()) == 1
@@ -124,14 +124,14 @@ function _lin2test(solver::Function, config::TestConfig, vecofvars::Bool)
 
     c = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,2,3,3], [x,s,y,x,z], [1.0,-1.0,1.0,1.0,1.0], [4.0,3.0,-12.0]), MOI.Zeros(3))
 
-    vc = _addvovconstraint!(instance, [y], MOI.Nonpositives(1), vecofvars)
+    vc = addvovconstraint!(instance, [y], MOI.Nonpositives(1), vecofvars)
     if vecofvars
         # test fallback
         vz = MOI.addconstraint!(instance, [z], MOI.Nonnegatives(1))
     else
         vz = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1], [z], [1.], [0.]), MOI.Nonnegatives(1))
     end
-    vs = _addvovconstraint!(instance, [s], MOI.Zeros(1), vecofvars)
+    vs = addvovconstraint!(instance, [s], MOI.Zeros(1), vecofvars)
 
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 2 - vecofvars
     @test MOI.get(instance, MOI.NumberOfConstraints{_vovf(vecofvars),MOI.Nonpositives}()) == 1
@@ -840,7 +840,7 @@ function _geomean1test(solver::Function, config::TestConfig, vecofvars, n=3)
     t = MOI.addvariable!(instance)
     x = MOI.addvariables!(instance, n)
 
-    gmc = _addvovconstraint!(instance, [t; x], MOI.GeometricMeanCone(n+1), vecofvars)
+    gmc = addvovconstraint!(instance, [t; x], MOI.GeometricMeanCone(n+1), vecofvars)
     c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(x, ones(n), 0.), MOI.LessThan(Float64(n)))
 
     @test MOI.get(instance, MOI.NumberOfConstraints{_vovf(vecofvars), MOI.GeometricMeanCone}()) == 1
@@ -905,7 +905,7 @@ function _exp1test(solver::Function, config::TestConfig, vecofvars::Bool)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
     vov = MOI.VectorOfVariables(v)
-    vc = _addvovconstraint!(instance, v, MOI.ExponentialCone(), vecofvars)
+    vc = addvovconstraint!(instance, v, MOI.ExponentialCone(), vecofvars)
 
     cx = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([v[1]], [1.], 0.), MOI.EqualTo(1.))
     cy = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([v[2]], [1.], 0.), MOI.EqualTo(2.))
@@ -1113,7 +1113,7 @@ function _sdp0test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
     X = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
-    cX = _addvovconstraint!(instance, X, sdpcone(2), vecofvars)
+    cX = addvovconstraint!(instance, X, sdpcone(2), vecofvars)
 
     c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([X[2]], [1.], 0.), MOI.EqualTo(1.))
 
@@ -1193,7 +1193,7 @@ function _sdp1test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
     x = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 9
 
-    cX = _addvovconstraint!(instance, X, sdpcone(3), vecofvars)
+    cX = addvovconstraint!(instance, X, sdpcone(3), vecofvars)
     cx = MOI.addconstraint!(instance, MOI.VectorOfVariables(x), MOI.SecondOrderCone(3))
 
     c1 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([X[1], X[3], X[6], x[1]], [1., 1, 1, 1], 0.), MOI.EqualTo(1.))
@@ -1407,7 +1407,7 @@ function _det1test(solver::Function, config::TestConfig, vecofvars::Bool, detcon
     Q = MOI.addvariables!(instance, square ? 4 : 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == (square ? 5 : 4)
 
-    cX = _addvovconstraint!(instance, [t; Q], detcone(2), vecofvars)
+    cX = addvovconstraint!(instance, [t; Q], detcone(2), vecofvars)
 
     c = MOI.addconstraint!(instance, MOI.VectorAffineFunction(collect(1:2), [Q[1], Q[end]], [-1., -1.], ones(2)), MOI.Nonnegatives(2))
 
