@@ -2,6 +2,13 @@ using MathOptInterfaceUtilities # Defines getindex for VectorAffineFunction
 const MOIU = MathOptInterfaceUtilities
 
 _vovf(vecofvars) = vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64}
+"""
+    _addvovconstraint!(instance, v::Vector{MOI.VariableIndex}, set::MOI.AbstractVectorSet, vecofvars::Bool)
+
+Add the constraint that the variables `v` should belong to the set `set` in `instance`.
+If `vecofvars` is `true`, this is done using a `VectorOfVariables` function, otherwise it is done using a `VectorAffineFunction{Float64}`.
+This is used to write tests which, depending on the boolean `vecofvars`, creates either `VectorOfVariables` constraints or `VectorAffineFunction` constraints.
+"""
 function _addvovconstraint!(instance, v::Vector{MOI.VariableIndex}, set::MOI.AbstractVectorSet, vecofvars::Bool)
     vov = MOI.VectorOfVariables(v)
     if vecofvars
