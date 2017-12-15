@@ -1,8 +1,6 @@
 using MathOptInterfaceUtilities # Defines getindex for VectorAffineFunction
 const MOIU = MathOptInterfaceUtilities
 
-_vovf(vecofvars) = vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64}
-
 # Continuous conic problems
 
 function _lin1test(solver::Function, config::TestConfig, vecofvars::Bool)
@@ -36,11 +34,11 @@ function _lin1test(solver::Function, config::TestConfig, vecofvars::Bool)
     end
 
     c = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,1,2,2], [v;v[2];v[3]], ones(5), [-3.0,-2.0]), MOI.Zeros(2))
-    @test MOI.get(instance, MOI.NumberOfConstraints{_vovf(vecofvars),MOI.Nonnegatives}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64},MOI.Nonnegatives}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 1
     loc = MOI.get(instance, MOI.ListOfConstraints())
     @test length(loc) == 2
-    @test (_vovf(vecofvars),MOI.Nonnegatives) in loc
+    @test (vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64},MOI.Nonnegatives) in loc
     @test (MOI.VectorAffineFunction{Float64},MOI.Zeros) in loc
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(v, [-3.0, -2.0, -4.0], 0.0))
@@ -134,8 +132,8 @@ function _lin2test(solver::Function, config::TestConfig, vecofvars::Bool)
     end
 
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 2 - vecofvars
-    @test MOI.get(instance, MOI.NumberOfConstraints{_vovf(vecofvars),MOI.Nonpositives}()) == 1
-    @test MOI.get(instance, MOI.NumberOfConstraints{_vovf(vecofvars),MOI.Nonnegatives}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64},MOI.Nonpositives}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64},MOI.Nonnegatives}()) == 1
 
     if config.solve
         MOI.optimize!(instance)
@@ -848,7 +846,7 @@ function _geomean1test(solver::Function, config::TestConfig, vecofvars, n=3)
     end
     c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(x, ones(n), 0.), MOI.LessThan(Float64(n)))
 
-    @test MOI.get(instance, MOI.NumberOfConstraints{_vovf(vecofvars), MOI.GeometricMeanCone}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64}, MOI.GeometricMeanCone}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}()) == 1
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([t], [1.], 0.))
@@ -1132,7 +1130,7 @@ function _sdp0test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
 
     c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([X[2]], [1.], 0.), MOI.EqualTo(1.))
 
-    @test MOI.get(instance, MOI.NumberOfConstraints{_vovf(vecofvars), sdpcone}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64}, sdpcone}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}()) == 1
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([X[1], X[3]], ones(2), 0.))
@@ -1222,7 +1220,7 @@ function _sdp1test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([X[1:3]; X[5:6]; x[1]], [2., 2, 2, 2, 2, 1], 0.))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
 
-    @test MOI.get(instance, MOI.NumberOfConstraints{_vovf(vecofvars), sdpcone}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64}, sdpcone}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}()) == 2
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorOfVariables, MOI.SecondOrderCone}()) == 1
 
@@ -1436,7 +1434,7 @@ function _det1test(solver::Function, config::TestConfig, vecofvars::Bool, detcon
 
     c = MOI.addconstraint!(instance, MOI.VectorAffineFunction(collect(1:2), [Q[1], Q[end]], [-1., -1.], ones(2)), MOI.Nonnegatives(2))
 
-    @test MOI.get(instance, MOI.NumberOfConstraints{_vovf(vecofvars), detcone}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64}, detcone}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.Nonnegatives}()) == 1
 
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([t], ones(1), 0.))
