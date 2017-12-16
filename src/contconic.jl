@@ -80,7 +80,7 @@ end
 lin1vtest(solver::Function, config::TestConfig) = _lin1test(solver, config, false)
 lin1ftest(solver::Function, config::TestConfig) = _lin1test(solver, config, false)
 
-function lin2test(solver::Function, config::TestConfig)
+function _lin2test(solver::Function, config::TestConfig, vecofvars::Bool)
     atol = config.atol
     rtol = config.rtol
     #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
@@ -112,14 +112,28 @@ function lin2test(solver::Function, config::TestConfig)
 
     c = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,2,3,3], [x,s,y,x,z], [1.0,-1.0,1.0,1.0,1.0], [4.0,3.0,-12.0]), MOI.Zeros(3))
 
-    vy = MOI.addconstraint!(instance, MOI.VectorOfVariables([y]), MOI.Nonpositives(1))
-    # test fallback
-    vz = MOI.addconstraint!(instance, [z], MOI.Nonnegatives(1))
-    vz = MOI.addconstraint!(instance, MOI.VectorOfVariables([s]), MOI.Zeros(1))
+    vov = MOI.VectorOfVariables([y])
+    if vecofvars
+        vc = MOI.addconstraint!(instance, vov, MOI.Nonpositives(1))
+    else
+        vc = MOI.addconstraint!(instance, MOI.VectorAffineFunction{Float64}(vov), MOI.Nonpositives(1))
+    end
+    if vecofvars
+        # test fallback
+        vz = MOI.addconstraint!(instance, [z], MOI.Nonnegatives(1))
+    else
+        vz = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1], [z], [1.], [0.]), MOI.Nonnegatives(1))
+    end
+    vov = MOI.VectorOfVariables([s])
+    if vecofvars
+        vs = MOI.addconstraint!(instance, vov, MOI.Zeros(1))
+    else
+        vs = MOI.addconstraint!(instance, MOI.VectorAffineFunction{Float64}(vov), MOI.Zeros(1))
+    end
 
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 1
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorOfVariables,MOI.Nonpositives}()) == 1
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorOfVariables,MOI.Nonnegatives}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 2 - vecofvars
+    @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64},MOI.Nonpositives}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{vecofvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64},MOI.Nonnegatives}()) == 1
 
     if config.solve
         MOI.optimize!(instance)
@@ -152,74 +166,8 @@ function lin2test(solver::Function, config::TestConfig)
     end
 end
 
-function lin2atest(solver::Function, config::TestConfig)
-    atol = config.atol
-    rtol = config.rtol
-    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Zeros),(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),(MOI.VectorAffineFunction{Float64},MOI.Nonpositives)])
-    # mixed cones
-    # same as LIN2 but with variable bounds enforced with VectorAffineFunction
-    # min  3x + 2y - 4z + 0s
-    # st    x           -  s  == -4    (i.e. x >= -4)
-    #            y            == -3
-    #       x      +  z       == 12
-    #       x free
-    #       y <= 0
-    #       z >= 0
-    #       s zero
-    # Opt solution = -82
-    # x = -4, y = -3, z = 16, s == 0
-
-    instance = solver()
-
-    x,y,z,s = MOI.addvariables!(instance, 4)
-    @test MOI.get(instance, MOI.NumberOfVariables()) == 4
-
-
-    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([x,y,z], [3.0, 2.0, -4.0], 0.0))
-    MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
-
-
-    c = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,2,3,3], [x,s,y,x,z], [1.0,-1.0,1.0,1.0,1.0], [4.0,3.0,-12.0]), MOI.Zeros(3))
-
-    vy = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[y],[1.0],[0.0]), MOI.Nonpositives(1))
-    vz = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[z],[1.0],[0.0]), MOI.Nonnegatives(1))
-    vz = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[s],[1.0],[0.0]), MOI.Zeros(1))
-
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 2
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Nonpositives}()) == 1
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Nonnegatives}()) == 1
-
-
-    if config.solve
-        MOI.optimize!(instance)
-
-        @test MOI.canget(instance, MOI.TerminationStatus())
-        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
-
-        @test MOI.canget(instance, MOI.PrimalStatus())
-        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-        if config.duals
-            @test MOI.canget(instance, MOI.DualStatus())
-            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-        end
-
-        @test MOI.canget(instance, MOI.ObjectiveValue())
-        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -82 atol=atol rtol=rtol
-
-        @test MOI.canget(instance, MOI.VariablePrimal(), x)
-        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ -4 atol=atol rtol=rtol
-        @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ -3 atol=atol rtol=rtol
-        @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 16 atol=atol rtol=rtol
-        @test MOI.get(instance, MOI.VariablePrimal(), s) ≈ 0 atol=atol rtol=rtol
-
-        if config.duals
-            @test MOI.canget(instance, MOI.ConstraintDual(), c)
-            @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [7, 2, -4] atol=atol rtol=rtol
-        end
-
-        # TODO var dual and con primal
-    end
-end
+lin2vtest(solver::Function, config::TestConfig) = _lin2test(solver, config, true)
+lin2ftest(solver::Function, config::TestConfig) = _lin2test(solver, config, false)
 
 function lin3test(solver::Function, config::TestConfig)
     atol = config.atol
@@ -310,8 +258,8 @@ end
 
 const lintests = Dict("lin1v" => lin1vtest,
                       "lin1f" => lin1ftest,
-                      "lin2"  => lin2test,
-                      "lin2a" => lin2atest,
+                      "lin2v" => lin2vtest,
+                      "lin2f" => lin2ftest,
                       "lin3"  => lin3test,
                       "lin4"  => lin4test)
 
@@ -960,6 +908,7 @@ function _exp1test(solver::Function, config::TestConfig, vecofvars::Bool)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
     vov = MOI.VectorOfVariables(v)
+    vov = MOI.VectorOfVariables(v)
     if vecofvars
         vc = MOI.addconstraint!(instance, vov, MOI.ExponentialCone())
     else
@@ -1172,10 +1121,11 @@ function _sdp0test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
     X = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
+    vov = MOI.VectorOfVariables(X)
     if vecofvars
-        cX = MOI.addconstraint!(instance, MOI.VectorOfVariables(X), sdpcone(2))
+        cX = MOI.addconstraint!(instance, vov, sdpcone(2))
     else
-        cX = MOI.addconstraint!(instance, MOI.VectorAffineFunction(collect(1:3), X, ones(3), zeros(3)), sdpcone(2))
+        cX = MOI.addconstraint!(instance, MOI.VectorAffineFunction{Float64}(vov), sdpcone(2))
     end
 
     c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([X[2]], [1.], 0.), MOI.EqualTo(1.))
@@ -1256,10 +1206,11 @@ function _sdp1test(solver::Function, vecofvars::Bool, sdpcone, config::TestConfi
     x = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 9
 
+    vov = MOI.VectorOfVariables(X)
     if vecofvars
-        cX = MOI.addconstraint!(instance, MOI.VectorOfVariables(X), sdpcone(3))
+        cX = MOI.addconstraint!(instance, vov, sdpcone(3))
     else
-        cX = MOI.addconstraint!(instance, MOI.VectorAffineFunction(collect(1:6), X, ones(6), zeros(6)), sdpcone(3))
+        cX = MOI.addconstraint!(instance, MOI.VectorAffineFunction{Float64}(vov), sdpcone(3))
     end
     cx = MOI.addconstraint!(instance, MOI.VectorOfVariables(x), MOI.SecondOrderCone(3))
 
