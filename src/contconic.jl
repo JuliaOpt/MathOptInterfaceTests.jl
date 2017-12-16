@@ -336,7 +336,7 @@ end
 soc1vtest(solver::Function, config::TestConfig) = _soc1test(solver, config, true)
 soc1ftest(solver::Function, config::TestConfig) = _soc1test(solver, config, false)
 
-function soc2test(solver::Function, config::TestConfig)
+function _soc2test(solver::Function, config::TestConfig, nonneg::Bool)
     atol = config.atol
     rtol = config.rtol
     #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Zeros),(MOI.VectorAffineFunction{Float64},MOI.Nonnegatives),(MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone)])
@@ -357,11 +357,15 @@ function soc2test(solver::Function, config::TestConfig)
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([x],[1.0],0.0))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
 
-    MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[y],[1.0],[-1/sqrt(2)]), MOI.Nonnegatives(1))
-    MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[t],[-1.0],[1.0]), MOI.Zeros(1))
-    MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,2,3],[t,x,y],ones(3),zeros(3)), MOI.SecondOrderCone(3))
+    if nonneg
+        cnon = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[y],[1.0],[-1/sqrt(2)]), MOI.Nonnegatives(1))
+    else
+        cnon = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[y],[-1.0],[1/sqrt(2)]), MOI.Nonpositives(1))
+    end
+    ceq = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[t],[-1.0],[1.0]), MOI.Zeros(1))
+    csoc = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,2,3],[t,x,y],ones(3),zeros(3)), MOI.SecondOrderCone(3))
 
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Nonnegatives}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},nonneg ? MOI.Nonnegatives : MOI.Nonpositives}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone}()) == 1
 
@@ -385,59 +389,26 @@ function soc2test(solver::Function, config::TestConfig)
         @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1/sqrt(2) atol=atol rtol=rtol
         @test MOI.get(instance, MOI.VariablePrimal(), t) ≈ 1 atol=atol rtol=rtol
 
-        # TODO constraint primal and duals
-    end
-end
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), cnon)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), cnon) ≈ [0.0] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), ceq)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), ceq) ≈ [0.0] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), csoc)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), csoc) ≈ [1., -1/sqrt(2), 1/sqrt(2)] atol=atol rtol=rtol
 
-function soc2atest(solver::Function, config::TestConfig)
-    atol = config.atol
-    rtol = config.rtol
-    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, [(MOI.VectorAffineFunction{Float64},MOI.Zeros),(MOI.VectorAffineFunction{Float64},MOI.Nonpositives),(MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone)])
-    # Problem SOC2A
-    # Same as SOC2 but with nonpositive instead of nonnegative
-    # min  x
-    # s.t.  1/√2 - y ∈ R₋
-    #        1 - t ∈ {0}
-    #      (t,x,y) ∈ SOC₃
-
-    instance = solver()
-
-    x,y,t = MOI.addvariables!(instance, 3)
-
-    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([x],[1.0],0.0))
-    MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
-
-    MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[y],[-1.0],[1/sqrt(2)]), MOI.Nonpositives(1))
-    MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[t],[-1.0],[1.0]), MOI.Zeros(1))
-    MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,2,3],[t,x,y],ones(3),zeros(3)), MOI.SecondOrderCone(3))
-
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Nonpositives}()) == 1
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 1
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.SecondOrderCone}()) == 1
-
-    if config.solve
-        MOI.optimize!(instance)
-
-        @test MOI.canget(instance, MOI.TerminationStatus())
-        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
-
-        @test MOI.canget(instance, MOI.PrimalStatus())
-        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
         if config.duals
-            @test MOI.canget(instance, MOI.DualStatus())
-            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+            @test MOI.canget(instance, MOI.ConstraintDual(), cnon)
+            @test MOI.get(instance, MOI.ConstraintDual(), cnon) ≈ [nonneg ? 1.0 : -1.0] atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ConstraintDual(), ceq)
+            @test MOI.get(instance, MOI.ConstraintDual(), ceq) ≈ [sqrt(2)] atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ConstraintDual(), csoc)
+            @test MOI.get(instance, MOI.ConstraintDual(), csoc) ≈ [sqrt(2), 1.0, -1.0] atol=atol rtol=rtol
         end
-
-        @test MOI.canget(instance, MOI.ObjectiveValue())
-        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -1/sqrt(2) atol=atol rtol=rtol
-
-        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ -1/sqrt(2) atol=atol rtol=rtol
-        @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1/sqrt(2) atol=atol rtol=rtol
-        @test MOI.get(instance, MOI.VariablePrimal(), t) ≈ 1 atol=atol rtol=rtol
-
-        # TODO constraint primal and duals
     end
 end
+
+soc2ntest(solver::Function, config::TestConfig) = _soc2test(solver, config, true)
+soc2ptest(solver::Function, config::TestConfig) = _soc2test(solver, config, false)
 
 function soc3test(solver::Function, config::TestConfig)
     atol = config.atol
@@ -556,8 +527,8 @@ end
 
 const soctests = Dict("soc1v" => soc1vtest,
                       "soc1f" => soc1ftest,
-                      "soc2"  => soc2test,
-                      "soc2a" => soc2atest,
+                      "soc2n" => soc2ntest,
+                      "soc2p" => soc2ptest,
                       "soc3"  => soc3test,
                       "soc4"  => soc4test)
 
