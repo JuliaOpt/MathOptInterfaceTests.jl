@@ -534,101 +534,44 @@ const soctests = Dict("soc1v" => soc1vtest,
 
 @moitestset soc
 
-function rotatedsoc1test(solver::Function, config::TestConfig)
+function _rotatedsoc1test(solver::Function, config::TestConfig, abvars::Bool)
     atol = config.atol
     rtol = config.rtol
     #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
     #    [(MOI.SingleVariable,MOI.EqualTo{Float64}),
     #     (MOI.VectorOfVariables,MOI.RotatedSecondOrderCone)])
-    # Problem SOCRotated1
+    # Problem SOCRotated1v
     # min 0a + 0b - 1x - 1y
     #  st  a            == 1/2
     #  st  b            == 1
     #      2a*b >= x^2+y^2
-    c = [ 0.0, 0.0, -1.0, -1.0]
-    A = [ 1.0  0.0   0.0   0.0
-          0.0  1.0   0.0   0.0]
-    b = [ 0.5, 1.0]
-
-    instance = solver()
-
-    x = MOI.addvariables!(instance, 4)
-
-    vc1 = MOI.addconstraint!(instance, MOI.SingleVariable(x[1]), MOI.EqualTo(0.5))
-    vc2 = MOI.addconstraint!(instance, MOI.SingleVariable(x[2]), MOI.EqualTo(1.0))
-
-    rsoc = MOI.addconstraint!(instance, MOI.VectorOfVariables(x), MOI.RotatedSecondOrderCone(4))
-
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.EqualTo{Float64}}()) == 2
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorOfVariables,MOI.RotatedSecondOrderCone}()) == 1
-
-    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(x,c,0.0))
-    MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
-    if config.solve
-        MOI.optimize!(instance)
-
-        @test MOI.canget(instance, MOI.TerminationStatus())
-        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
-
-        @test MOI.canget(instance, MOI.PrimalStatus())
-        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
-        if config.duals
-            @test MOI.canget(instance, MOI.DualStatus())
-            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-        end
-
-        @test MOI.canget(instance, MOI.ObjectiveValue())
-        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -sqrt(2.0) atol=atol rtol=rtol
-
-        @test MOI.canget(instance, MOI.VariablePrimal(), x)
-        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ [0.5, 1.0, 1.0/sqrt(2.0), 1.0/sqrt(2.0)] atol=atol rtol=rtol
-
-        if config.duals
-            @test MOI.canget(instance, MOI.DualStatus(1))
-            @test MOI.get(instance, MOI.DualStatus(1)) == MOI.FeasiblePoint
-
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc1)
-            d1 = MOI.get(instance, MOI.ConstraintDual(), vc1)
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc2)
-            d2 = MOI.get(instance, MOI.ConstraintDual(), vc2)
-
-            d = [d1, d2]
-            dualobj = dot(b, d)
-            @test dualobj ≈ -sqrt(2.0) atol=atol rtol=rtol
-            @test d1 <= atol
-            @test d2 <= atol
-
-            @test MOI.canget(instance, MOI.ConstraintDual(), rsoc)
-            vardual = MOI.get(instance, MOI.ConstraintDual(), rsoc)
-
-            @test vardual ≈ (c - A'd) atol=atol rtol=rtol
-            @test 2*vardual[1]*vardual[2] ≥ vardual[3]^2 + vardual[4]^2 - atol
-        end
-    end
-end
-
-function rotatedsoc1atest(solver::Function, config::TestConfig)
-    atol = config.atol
-    rtol = config.rtol
-    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64},
-    #    [(MOI.VectorAffineFunction{Float64},MOI.RotatedSecondOrderCone)])
-    # Problem SOCRotated1A - Problem SOCRotated1 with a and b substituted
+    # Problem SOCRotated1f - Problem SOCRotated1v with a and b substituted
     # min          -y - z
     #  st [0.5] - [      ] SOCRotated
     #     [1.0] - [      ] SOCRotated
     #     [0.0] - [-y    ] SOCRotated
     #     [0.0] - [    -z] SOCRotated
-    b = [0.5, 1.0, 0.0, 0.0]
 
     instance = solver()
 
     x = MOI.addvariables!(instance, 2)
+    if abvars
+        a = MOI.addvariable!(instance)
+        b = MOI.addvariable!(instance)
+        vc1 = MOI.addconstraint!(instance, MOI.SingleVariable(a), MOI.EqualTo(0.5))
+        vc2 = MOI.addconstraint!(instance, MOI.SingleVariable(b), MOI.EqualTo(1.0))
+        rsoc = MOI.addconstraint!(instance, MOI.VectorOfVariables([a; b; x]), MOI.RotatedSecondOrderCone(4))
+    else
+        a = 0.5
+        b = 1.0
+        rsoc = MOI.addconstraint!(instance, MOI.VectorAffineFunction([3, 4], x, [1., 1.], [a, b, 0., 0.]), MOI.RotatedSecondOrderCone(4))
+    end
 
-    rsoc = MOI.addconstraint!(instance, MOI.VectorAffineFunction([3, 4], x, [1., 1.], b), MOI.RotatedSecondOrderCone(4))
-    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.RotatedSecondOrderCone}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.EqualTo{Float64}}()) == (abvars ? 2 : 0)
+    @test MOI.get(instance, MOI.NumberOfConstraints{abvars ? MOI.VectorOfVariables : MOI.VectorAffineFunction{Float64},MOI.RotatedSecondOrderCone}()) == 1
 
-    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(x, [-1.0,-1.0], 0.0))
-    MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
+    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(x,ones(2),0.0))
+    MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
     if config.solve
         MOI.optimize!(instance)
 
@@ -643,27 +586,46 @@ function rotatedsoc1atest(solver::Function, config::TestConfig)
         end
 
         @test MOI.canget(instance, MOI.ObjectiveValue())
-        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -sqrt(2.0) atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ sqrt(2.0) atol=atol rtol=rtol
 
+        if abvars
+            @test MOI.canget(instance, MOI.VariablePrimal(), a)
+            @test MOI.get(instance, MOI.VariablePrimal(), a) ≈ 0.5 atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.VariablePrimal(), b)
+            @test MOI.get(instance, MOI.VariablePrimal(), b) ≈ 1.0 atol=atol rtol=rtol
+        end
         @test MOI.canget(instance, MOI.VariablePrimal(), x)
         @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ [1.0/sqrt(2.0), 1.0/sqrt(2.0)] atol=atol rtol=rtol
+
+        if abvars
+            @test MOI.canget(instance, MOI.ConstraintPrimal(), vc1)
+            @test MOI.get(instance, MOI.ConstraintPrimal(), vc1) ≈ 0.5
+            @test MOI.canget(instance, MOI.ConstraintPrimal(), vc2)
+            @test MOI.get(instance, MOI.ConstraintPrimal(), vc2) ≈ 1.0
+        end
+
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), rsoc)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), rsoc) ≈ [0.5, 1.0, 1.0/sqrt(2.0), 1.0/sqrt(2.0)] atol=atol rtol=rtol
 
         if config.duals
             @test MOI.canget(instance, MOI.DualStatus(1))
             @test MOI.get(instance, MOI.DualStatus(1)) == MOI.FeasiblePoint
 
-            @test MOI.canget(instance, MOI.ConstraintPrimal(), rsoc)
-            @test MOI.get(instance, MOI.ConstraintPrimal(), rsoc) ≈ [0.5, 1.0, 1.0/sqrt(2.0), 1.0/sqrt(2.0)] atol=atol rtol=rtol
+            if abvars
+                @test MOI.canget(instance, MOI.ConstraintDual(), vc1)
+                @test MOI.get(instance, MOI.ConstraintDual(), vc1) ≈ -sqrt(2) atol=atol rtol=rtol
+                @test MOI.canget(instance, MOI.ConstraintDual(), vc2)
+                @test MOI.get(instance, MOI.ConstraintDual(), vc2) ≈ -1/sqrt(2) atol=atol rtol=rtol
+            end
 
             @test MOI.canget(instance, MOI.ConstraintDual(), rsoc)
-            d = MOI.get(instance, MOI.ConstraintDual(), rsoc)
-            @test 2*d[1]*d[2] ≥ d[3]^2 + d[4]^2 - atol
-
-            dualobj = -dot(b, d)
-            @test dualobj ≈ -sqrt(2.0) atol=atol rtol=rtol
+            @test MOI.get(instance, MOI.ConstraintDual(), rsoc) ≈ [sqrt(2), 1/sqrt(2), -1.0, -1.0]
         end
     end
 end
+
+rotatedsoc1vtest(solver::Function, config::TestConfig) = _rotatedsoc1test(solver, config, true)
+rotatedsoc1ftest(solver::Function, config::TestConfig) = _rotatedsoc1test(solver, config, false)
 
 function rotatedsoc2test(solver::Function, config::TestConfig)
     atol = config.atol
@@ -739,8 +701,8 @@ function rotatedsoc2test(solver::Function, config::TestConfig)
     end
 end
 
-const rsoctests = Dict("rotatedsoc1"  => rotatedsoc1test,
-                       "rotatedsoc1a" => rotatedsoc1atest,
+const rsoctests = Dict("rotatedsoc1v" => rotatedsoc1vtest,
+                       "rotatedsoc1f" => rotatedsoc1ftest,
                        "rotatedsoc2"  => rotatedsoc2test)
 
 @moitestset rsoc
