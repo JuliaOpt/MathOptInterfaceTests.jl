@@ -157,12 +157,25 @@ function _lin2test(solver::Function, config::TestConfig, vecofvars::Bool)
         @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 16 atol=atol rtol=rtol
         @test MOI.get(instance, MOI.VariablePrimal(), s) ≈ 0 atol=atol rtol=rtol
 
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), c)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c) ≈ zeros(3) atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), vc)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), vc) ≈ [-3] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), vz)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), vz) ≈ [16] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), vs)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), vs) ≈ [0] atol=atol rtol=rtol
+
         if config.duals
             @test MOI.canget(instance, MOI.ConstraintDual(), c)
             @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ [7, 2, -4] atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ConstraintDual(), vc)
+            @test MOI.get(instance, MOI.ConstraintDual(), vc) ≈ [0] atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ConstraintDual(), vz)
+            @test MOI.get(instance, MOI.ConstraintDual(), vz) ≈ [0] atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ConstraintDual(), vs)
+            @test MOI.get(instance, MOI.ConstraintDual(), vs) ≈ [7] atol=atol rtol=rtol
         end
-
-        # TODO var dual and con primal
     end
 end
 
