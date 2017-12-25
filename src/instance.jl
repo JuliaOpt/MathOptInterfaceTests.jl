@@ -72,3 +72,52 @@ function validtest(instance::MOI.AbstractInstance)
     @test !MOI.isvalid(instance, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float32}}(1))
     @test !MOI.isvalid(instance, MOI.ConstraintIndex{MOI.VectorQuadraticFunction{Float64},MOI.SecondOrderCone}(1))
 end
+
+function emptytest(instance::MOI.AbstractInstance)
+    # Taken from LIN1
+    v = MOI.addvariables!(instance, 3)
+    vc = MOI.addconstraint!(instance, MOI.VectorOfVariables(v), MOI.Nonnegatives(3))
+    c = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,1,2,2], [v;v[2];v[3]], ones(5), [-3.0,-2.0]), MOI.Zeros(2))
+    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(v, [-3.0, -2.0, -4.0], 0.0))
+    MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
+
+    @test !MOI.isempty(instance)
+
+    MOI.empty!(instance)
+
+    @test MOI.isempty(instance)
+
+    @test MOI.get(instance, MOI.NumberOfVariables()) == 0
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorOfVariables,MOI.Nonnegatives}()) == 0
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 0
+    @test isempty(MOI.get(instance, MOI.ListOfConstraints()))
+
+    @test !MOI.isvalid(instance, v[1])
+    @test !MOI.isvalid(instance, vc)
+    @test !MOI.isvalid(instance, c)
+end
+
+function copytest(src::MOI.AbstractInstance, dest::MOI.AbstractInstance)
+    v = MOI.addvariables!(src, 3)
+    cvv = MOI.addconstraint!(src, MOI.VectorOfVariables(v), MOI.Nonnegatives(3))
+    cva = MOI.addconstraint!(src, MOI.VectorAffineFunction([1, 2], [v[3], v[2]], ones(5), [-3.0,-2.0]), MOI.Zeros(2))
+    MOI.set!(src, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(v, [-3.0, -2.0, -4.0], 0.0))
+    MOI.set!(src, MOI.ObjectiveSense(), MOI.MinSense)
+
+    dict = MOI.copy!(dest, src)
+
+    @test MOI.get(dest, MOI.NumberOfVariables()) == 3
+    @test MOI.get(dest, MOI.NumberOfConstraints{MOI.VectorOfVariables,MOI.Nonnegatives}()) == 1
+    @test MOI.get(dest, MOI.ListOfConstraintIndices{MOI.VectorOfVariables,MOI.Nonnegatives}()) == [dict[cvv]]
+    @test MOI.get(dest, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 1
+    @test MOI.get(dest, MOI.ListOfConstraintIndices{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == [dict[cva]]
+    loc = MOI.get(dest, MOI.ListOfConstraints())
+    @test length(loc) == 2
+    @test (MOI.VectorOfVariables,MOI.Nonnegatives) in loc
+    @test (MOI.VectorAffineFunction{Float64},MOI.Zeros) in loc
+
+    @test MOI.canget(dest, MOI.ConstraintFunction(), cvv)
+    @test MOI.get(dest, MOI.ConstraintFunction(), cvv) ≈ MOI.VectorOfVariables(getindex.(dict, v))
+    @test MOI.canget(dest, MOI.ConstraintSet(), cvv)
+    @test MOI.get(dest, MOI.ConstraintSet(), cvv) == MOI.Nonnegatives(3)
+end
