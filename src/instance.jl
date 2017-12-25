@@ -125,11 +125,11 @@ function copytest(src::MOI.AbstractInstance, dest::MOI.AbstractInstance)
     @test (MOI.VectorAffineFunction{Float64},MOI.Zeros) in loc
 
     @test MOI.canget(dest, MOI.ConstraintFunction(), dict[csv])
-    @test MOI.get(dest, MOI.ConstraintFunction(), dict[csv]) ≈ MOI.SingleVariable(dict[v[2]])
+    @test MOI.get(dest, MOI.ConstraintFunction(), dict[csv]) == MOI.SingleVariable(dict[v[2]])
     @test MOI.canget(dest, MOI.ConstraintSet(), dict[csv])
     @test MOI.get(dest, MOI.ConstraintSet(), dict[csv]) == MOI.EqualTo(2.)
     @test MOI.canget(dest, MOI.ConstraintFunction(), dict[cvv])
-    @test MOI.get(dest, MOI.ConstraintFunction(), dict[cvv]) ≈ MOI.VectorOfVariables(getindex.(dict, v))
+    @test MOI.get(dest, MOI.ConstraintFunction(), dict[cvv]) == MOI.VectorOfVariables(getindex.(dict, v))
     @test MOI.canget(dest, MOI.ConstraintSet(), dict[cvv])
     @test MOI.get(dest, MOI.ConstraintSet(), dict[cvv]) == MOI.Nonnegatives(3)
     @test MOI.canget(dest, MOI.ConstraintFunction(), dict[csa])
