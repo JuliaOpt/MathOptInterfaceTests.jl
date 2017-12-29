@@ -632,7 +632,7 @@ function _rotatedsoc1test(solver::Function, config::TestConfig, abvars::Bool)
             end
 
             @test MOI.canget(instance, MOI.ConstraintDual(), rsoc)
-            @test MOI.get(instance, MOI.ConstraintDual(), rsoc) ≈ [sqrt(2), 1/sqrt(2), -1.0, -1.0]
+            @test MOI.get(instance, MOI.ConstraintDual(), rsoc) ≈ [sqrt(2), 1/sqrt(2), -1.0, -1.0] atol=atol rtol=rtol
         end
     end
 end
