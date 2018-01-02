@@ -141,3 +141,20 @@ function copytest(src::MOI.AbstractInstance, dest::MOI.AbstractInstance)
     @test MOI.canget(dest, MOI.ConstraintSet(), dict[cva])
     @test MOI.get(dest, MOI.ConstraintSet(), dict[cva]) == MOI.Zeros(2)
 end
+
+struct UnknownSet <: MOI.AbstractSet end
+
+function canaddconstrainttest(instance::MOI.AbstractInstance, ::Type{GoodT}, ::Type{BadT}) where {GoodT, BadT}
+    v = MOI.addvariable!(instance)
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable(v), MOI.EqualTo(one(GoodT)))
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction([v], [one(GoodT)], one(GoodT)), MOI.EqualTo(one(GoodT)))
+    # Bad type
+    @test !MOI.canaddconstraint(instance, MOI.ScalarAffineFunction([v], [one(BadT)], zero(BadT)), MOI.EqualTo(one(GoodT)))
+    @test !MOI.canaddconstraint(instance, MOI.ScalarAffineFunction([v], [one(BadT)], zero(BadT)), MOI.EqualTo(one(BadT)))
+    @test !MOI.canaddconstraint(instance, MOI.SingleVariable(v), MOI.EqualTo(one(BadT)))
+
+    @test MOI.canaddconstraint(instance, MOI.VectorOfVariables([v]), MOI.Zeros(1))
+    @test !MOI.canaddconstraint(instance, MOI.VectorOfVariables([v]), MOI.EqualTo(one(GoodT))) # vector in scalar
+    @test !MOI.canaddconstraint(instance, MOI.SingleVariable(v), MOI.Zeros(1)) # scalar in vector
+    @test !MOI.canaddconstraint(instance, MOI.VectorOfVariables([v, v]), UnknownSet()) # set not supported
+end
