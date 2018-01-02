@@ -38,6 +38,10 @@ function linear1test(solver::Function, config::TestConfig)
     @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MinSense
 
     if config.query
+        @test MOI.canget(instance, MOI.ListOfVariableIndices())
+        vrs = MOI.get(instance, MOI.ListOfVariableIndices())
+        @test vrs == v || vrs == reverse(v)
+
         @test MOI.canget(instance, MOI.ObjectiveFunction())
         @test objf ≈ MOI.get(instance, MOI.ObjectiveFunction())
 
@@ -138,6 +142,16 @@ function linear1test(solver::Function, config::TestConfig)
     z = MOI.addvariable!(instance)
     push!(v, z)
     @test v[3] == z
+
+    if config.query
+        # Test that the modifcation of v has not affected the instance
+        @test MOI.canget(instance, MOI.ConstraintFunction(), c)
+        vars = MOI.get(instance, MOI.ConstraintFunction(), c).variables
+        @test vars == [v[1], v[2]] || vars == [v[2], v[1]]
+        @test MOI.canget(instance, MOI.ObjectiveFunction())
+        vars = MOI.get(instance, MOI.ObjectiveFunction()).variables
+        @test vars == [v[1], v[2]] || vars == [v[2], v[1]]
+    end
 
     vc3 = MOI.addconstraint!(instance, MOI.SingleVariable(v[3]), MOI.GreaterThan(0.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 3
@@ -343,6 +357,26 @@ function linear1test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ConstraintDual(), vc3)
             @test MOI.get(instance, MOI.ConstraintDual(), vc3) ≈ 1.5 atol=atol rtol=rtol
         end
+    end
+
+    if config.query
+        @test MOI.canget(instance, MOI.ConstraintFunction(), c2)
+        @test MOI.get(instance, MOI.ConstraintFunction(), c2) ≈ cf2
+    end
+
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 2
+    MOI.delete!(instance, v[1])
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 1
+
+    if config.query
+        f = MOI.get(instance, MOI.ConstraintFunction(), c2)
+        @test (f.variables == [v[2], z] && f.coefficients == [-1.0, 0.0]) || (f.variables == [z, v[2]] && f.coefficients == [0.0, -1.0])
+
+        @test MOI.canget(instance, MOI.ListOfVariableIndices())
+        vrs = MOI.get(instance, MOI.ListOfVariableIndices())
+        @test vrs == [v[2], z] || vrs == [z, v[2]]
+        @test MOI.canget(instance, MOI.ObjectiveFunction())
+        @test MOI.get(instance, MOI.ObjectiveFunction()) ≈ MOI.ScalarAffineFunction([v[2], z], [2.0, 0.0], 0.0)
     end
 end
 
