@@ -106,7 +106,9 @@ function copytest(src::MOI.AbstractInstance, dest::MOI.AbstractInstance)
     MOI.set!(src, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(v, [-3.0, -2.0, -4.0], 0.0))
     MOI.set!(src, MOI.ObjectiveSense(), MOI.MinSense)
 
-    dict = MOI.copy!(dest, src)
+    copyresult = MOI.copy!(dest, src)
+    @test copyresult.status == MOI.CopySuccess
+    dict = copyresult.indexmap
 
     @test MOI.get(dest, MOI.NumberOfVariables()) == 3
     @test MOI.get(dest, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.EqualTo{Float64}}()) == 1
