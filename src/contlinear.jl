@@ -41,18 +41,18 @@ function linear1test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.ObjectiveFunction())
         @test objf ≈ MOI.get(instance, MOI.ObjectiveFunction())
 
-        @test MOI.canget(instance, MOI.ConstraintFunction(), c)
+        @test MOI.canget(instance, MOI.ConstraintFunction(), typeof(c))
         @test cf ≈ MOI.get(instance, MOI.ConstraintFunction(), c)
 
-        @test MOI.canget(instance, MOI.ConstraintSet(), c)
+        @test MOI.canget(instance, MOI.ConstraintSet(), typeof(c))
         s = MOI.get(instance, MOI.ConstraintSet(), c)
         @test s == MOI.LessThan(1.0)
 
-        @test MOI.canget(instance, MOI.ConstraintSet(), vc1)
+        @test MOI.canget(instance, MOI.ConstraintSet(), typeof(vc1))
         s = MOI.get(instance, MOI.ConstraintSet(), vc1)
         @test s == MOI.GreaterThan(0.0)
 
-        @test MOI.canget(instance, MOI.ConstraintSet(), vc2)
+        @test MOI.canget(instance, MOI.ConstraintSet(), typeof(vc2))
         s = MOI.get(instance, MOI.ConstraintSet(), vc2)
         @test s == MOI.GreaterThan(0.0)
     end
@@ -69,22 +69,22 @@ function linear1test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -1 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), v)
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
         @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 0] atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.ConstraintPrimal(), c)
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(c))
         @test MOI.get(instance, MOI.ConstraintPrimal(), c) ≈ 1 atol=atol rtol=rtol
 
         if config.duals
             @test MOI.canget(instance, MOI.DualStatus())
             @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-            @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c))
             @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ -1 atol=atol rtol=rtol
 
             # reduced costs
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc1)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(vc1))
             @test MOI.get(instance, MOI.ConstraintDual(), vc1) ≈ 0 atol=atol rtol=rtol
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc2)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(vc2))
             @test MOI.get(instance, MOI.ConstraintDual(), vc2) ≈ 1 atol=atol rtol=rtol
         end
     end
@@ -114,18 +114,18 @@ function linear1test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 1 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), v)
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
         @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 0] atol=atol rtol=rtol
 
         if config.duals
             @test MOI.canget(instance, MOI.DualStatus())
             @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-            @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c))
             @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ -1 atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc1)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(vc1))
             @test MOI.get(instance, MOI.ConstraintDual(), vc1) ≈ 0 atol=atol rtol=rtol
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc2)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(vc2))
             @test MOI.get(instance, MOI.ConstraintDual(), vc2) ≈ 1 atol=atol rtol=rtol
         end
     end
@@ -166,23 +166,23 @@ function linear1test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 2 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), v)
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
         @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0, 0, 1] atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.ConstraintPrimal(), c)
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(c))
         @test MOI.get(instance, MOI.ConstraintPrimal(), c) ≈ 1 atol=atol rtol=rtol
 
         if config.duals
             @test MOI.canget(instance, MOI.DualStatus())
             @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-            @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c))
             @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ -2 atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc1)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(vc1))
             @test MOI.get(instance, MOI.ConstraintDual(), vc1) ≈ 1 atol=atol rtol=rtol
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc2)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(vc2))
             @test MOI.get(instance, MOI.ConstraintDual(), vc2) ≈ 2 atol=atol rtol=rtol
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc3)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(vc3))
             @test MOI.get(instance, MOI.ConstraintDual(), vc3) ≈ 0 atol=atol rtol=rtol
         end
     end
@@ -291,7 +291,7 @@ function linear1test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 4 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), v)
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
         @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0, 2, 0] atol=atol rtol=rtol
     end
 
@@ -322,25 +322,25 @@ function linear1test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 3 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), v)
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
         @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 1, 0] atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.ConstraintPrimal(), c)
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(c))
         @test MOI.get(instance, MOI.ConstraintPrimal(), c) ≈ 2 atol=atol rtol=rtol
 
         if config.duals
             @test MOI.canget(instance, MOI.DualStatus(1))
             @test MOI.get(instance, MOI.DualStatus(1)) == MOI.FeasiblePoint
 
-            @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c))
             @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ -1.5 atol=atol rtol=rtol
             @test MOI.get(instance, MOI.ConstraintDual(), c2) ≈ 0.5 atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc1)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(vc1))
             @test MOI.get(instance, MOI.ConstraintDual(), vc1) ≈ 0 atol=atol rtol=rtol
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc2)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(vc2))
             @test MOI.get(instance, MOI.ConstraintDual(), vc2) ≈ 0 atol=atol rtol=rtol
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc3)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(vc3))
             @test MOI.get(instance, MOI.ConstraintDual(), vc3) ≈ 1.5 atol=atol rtol=rtol
         end
     end
@@ -389,25 +389,25 @@ function linear2test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -1 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), x)
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
         @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ 1 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), y)
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
         @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 0 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.ConstraintPrimal(), c)
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(c))
         @test MOI.get(instance, MOI.ConstraintPrimal(), c) ≈ 1 atol=atol rtol=rtol
 
         if config.duals
             @test MOI.canget(instance, MOI.DualStatus())
             @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-            @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c))
             @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ -1 atol=atol rtol=rtol
 
             # reduced costs
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc1)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(vc1))
             @test MOI.get(instance, MOI.ConstraintDual(), vc1) ≈ 0 atol=atol rtol=rtol
-            @test MOI.canget(instance, MOI.ConstraintDual(), vc2)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(vc2))
             @test MOI.get(instance, MOI.ConstraintDual(), vc2) ≈ 1 atol=atol rtol=rtol
         end
     end
@@ -611,7 +611,7 @@ function linear5test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 8/3 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), [x, y])
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
         @test MOI.get(instance, MOI.VariablePrimal(), [x, y]) ≈ [4/3, 4/3] atol=atol rtol=rtol
     end
 
@@ -641,7 +641,7 @@ function linear5test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 2 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), [x, y])
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
         @test MOI.get(instance, MOI.VariablePrimal(), [x, y]) ≈ [2.0, 0.0] atol=atol rtol=rtol
     end
 
@@ -667,7 +667,7 @@ function linear5test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 4 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), [x, y])
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
         @test MOI.get(instance, MOI.VariablePrimal(), [x, y]) ≈ [4.0, 0.0] atol=atol rtol=rtol
     end
 
@@ -693,7 +693,7 @@ function linear5test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 2 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), y)
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
         @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 2.0 atol=atol rtol=rtol
     end
 end
@@ -852,7 +852,7 @@ function linear8atest(solver::Function, config::TestConfig)
             @test MOI.get(instance, MOI.ResultCount()) >= 1
             @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
             @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
-            @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c))
             cd = MOI.get(instance, MOI.ConstraintDual(), c)
             @test cd < -atol
             # TODO: farkas dual on bounds - see #127
@@ -934,7 +934,7 @@ function linear8ctest(solver::Function, config::TestConfig)
             @test MOI.get(instance, MOI.ResultCount()) >= 1
             @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
             @test MOI.get(instance, MOI.PrimalStatus()) == MOI.InfeasibilityCertificate
-            @test MOI.canget(instance, MOI.VariablePrimal(), [x, y])
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             ray = MOI.get(instance, MOI.VariablePrimal(), [x,y])
             @test ray[1] ≈ ray[2] atol=atol rtol=rtol
 
@@ -1051,7 +1051,7 @@ function linear10test(solver::Function, config::TestConfig)
             @test MOI.get(instance, MOI.ResultCount()) >= 1
             @test MOI.canget(instance, MOI.DualStatus())
             @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-            @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c))
             @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ -1 atol=atol rtol=rtol
         end
     end
@@ -1070,7 +1070,7 @@ function linear10test(solver::Function, config::TestConfig)
             @test MOI.get(instance, MOI.ResultCount()) >= 1
             @test MOI.canget(instance, MOI.DualStatus())
             @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
-            @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c))
             @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ 1 atol=atol rtol=rtol
         end
     end
@@ -1176,7 +1176,7 @@ function linear12test(solver::Function, config::TestConfig)
             @test MOI.get(instance, MOI.ResultCount()) >= 1
             @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
             @test MOI.get(instance, MOI.DualStatus()) == MOI.InfeasibilityCertificate
-            @test MOI.canget(instance, MOI.ConstraintDual(), c1)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c1))
             cd1 = MOI.get(instance, MOI.ConstraintDual(), c1)
             cd2 = MOI.get(instance, MOI.ConstraintDual(), c2)
             bndxd = MOI.get(instance, MOI.ConstraintDual(), bndx)

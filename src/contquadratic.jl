@@ -35,10 +35,10 @@ function qp1test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ObjectiveFunction())
             @test obj ≈ MOI.get(instance, MOI.ObjectiveFunction())
 
-            @test MOI.canget(instance, MOI.ConstraintFunction(), c1)
+            @test MOI.canget(instance, MOI.ConstraintFunction(), typeof(c1))
             @test cf1 ≈ MOI.get(instance, MOI.ConstraintFunction(), c1)
 
-            @test MOI.canget(instance, MOI.ConstraintSet(), c1)
+            @test MOI.canget(instance, MOI.ConstraintSet(), typeof(c1))
             @test MOI.GreaterThan(4.0) == MOI.get(instance, MOI.ConstraintSet(), c1)
         end
 
@@ -54,7 +54,7 @@ function qp1test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 130/70 atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.VariablePrimal(), v)
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0.5714285714285715,0.4285714285714285,0.8571428571428572] atol=atol rtol=rtol
         end
     end
@@ -95,10 +95,10 @@ function qp2test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ObjectiveFunction())
             @test obj ≈ MOI.get(instance, MOI.ObjectiveFunction())
 
-            @test MOI.canget(instance, MOI.ConstraintFunction(), c1)
+            @test MOI.canget(instance, MOI.ConstraintFunction(), typeof(c1))
             @test c1f ≈ MOI.get(instance, MOI.ConstraintFunction(), c1)
 
-            @test MOI.canget(instance, MOI.ConstraintSet(), c1)
+            @test MOI.canget(instance, MOI.ConstraintSet(), typeof(c1))
             @test MOI.GreaterThan(4.0) == MOI.get(instance, MOI.ConstraintSet(), c1)
         end
 
@@ -114,7 +114,7 @@ function qp2test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 130/70 atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.VariablePrimal(), v)
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0.5714285714285715,0.4285714285714285,0.8571428571428572] atol=atol rtol=rtol
         end
 
@@ -141,7 +141,7 @@ function qp2test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -2*130/70 atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.VariablePrimal(), v)
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0.5714285714285715,0.4285714285714285,0.8571428571428572] atol=atol rtol=rtol
         end
     end
@@ -194,7 +194,7 @@ function qp3test(solver::Function, config::TestConfig)
 
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 2.875 atol=atol rtol=rtol
-            @test MOI.canget(instance, MOI.VariablePrimal(), [x,y])
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), [x,y]) ≈ [0.25, 0.75] atol=atol rtol=rtol
         end
 
@@ -218,7 +218,7 @@ function qp3test(solver::Function, config::TestConfig)
 
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 3.0 atol=atol rtol=rtol
-            @test MOI.canget(instance, MOI.VariablePrimal(), [x,y])
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), [x,y]) ≈ [1.0, 0.0] atol=atol rtol=rtol
         end
 
@@ -268,7 +268,7 @@ function qcp1test(solver::Function, config::TestConfig)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
 
         if config.query
-            @test MOI.canget(instance, MOI.ConstraintFunction(), c2)
+            @test MOI.canget(instance, MOI.ConstraintFunction(), typeof(c2))
             @test c2f ≈ MOI.get(instance, MOI.ConstraintFunction(), c2)
         end
 
@@ -284,7 +284,7 @@ function qcp1test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 2.25 atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.VariablePrimal(), [x,y])
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), [x,y]) ≈ [0.5,1.75] atol=atol rtol=rtol
         end
 
@@ -329,7 +329,7 @@ function qcp2test(solver::Function, config::TestConfig)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
 
         if config.query
-            @test MOI.canget(instance, MOI.ConstraintFunction(), c)
+            @test MOI.canget(instance, MOI.ConstraintFunction(), typeof(c))
             @test cf ≈ MOI.get(instance, MOI.ConstraintFunction(), c)
         end
 
@@ -350,11 +350,11 @@ function qcp2test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ sqrt(2) atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.VariablePrimal(), x)
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ sqrt(2) atol=atol rtol=rtol
 
             # TODO - duals
-            # @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            # @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c))
             # @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ 0.5/sqrt(2) atol=atol rtol=rtol
         end
     end
@@ -383,7 +383,7 @@ function qcp3test(solver::Function, config::TestConfig)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MinSense
 
         if config.query
-            @test MOI.canget(instance, MOI.ConstraintFunction(), c)
+            @test MOI.canget(instance, MOI.ConstraintFunction(), typeof(c))
             @test cf ≈ MOI.get(instance, MOI.ConstraintFunction(), c)
         end
 
@@ -404,11 +404,11 @@ function qcp3test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -sqrt(2) atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.VariablePrimal(), x)
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ sqrt(2) atol=atol rtol=rtol
 
             # TODO - duals
-            # @test MOI.canget(instance, MOI.ConstraintDual(), c)
+            # @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c))
             # @test MOI.get(instance, MOI.ConstraintDual(), c) ≈ -0.5/sqrt(2) atol=atol rtol=rtol
         end
     end
@@ -460,10 +460,10 @@ function socp1test(solver::Function, config::TestConfig)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MinSense
 
         if config.query
-            @test MOI.canget(instance, MOI.ConstraintFunction(), c1)
+            @test MOI.canget(instance, MOI.ConstraintFunction(), typeof(c1))
             @test c1f ≈ MOI.get(instance, MOI.ConstraintFunction(), c1)
 
-            @test MOI.canget(instance, MOI.ConstraintFunction(), c2)
+            @test MOI.canget(instance, MOI.ConstraintFunction(), typeof(c2))
             @test c2f ≈ MOI.get(instance, MOI.ConstraintFunction(), c2)
         end
 
@@ -479,10 +479,10 @@ function socp1test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ sqrt(1/2) atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.VariablePrimal(), [x,y,t])
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), [x,y,t]) ≈ [0.5,0.5,sqrt(1/2)] atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.VariablePrimal(), [t,x,y,t])
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), [t,x,y,t]) ≈ [sqrt(1/2),0.5,0.5,sqrt(1/2)] atol=atol rtol=rtol
         end
     end
