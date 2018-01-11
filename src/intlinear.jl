@@ -63,13 +63,13 @@ function int1test(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 19.4 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), v)
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
         @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [4,5,1] atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.ConstraintPrimal(), c)
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(c))
         @test MOI.get(instance, MOI.ConstraintPrimal(), c) ≈ 10 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.ConstraintPrimal(), c2)
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(c2))
         @test MOI.get(instance, MOI.ConstraintPrimal(), c2) ≈ 15 atol=atol rtol=rtol
 
         @test MOI.canget(instance, MOI.DualStatus()) == false
@@ -120,8 +120,8 @@ function int2test(solver::Function, config::TestConfig)
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorOfVariables,MOI.SOS1}()) == 2
 
 
-        @test MOI.canget(instance, MOI.ConstraintSet(), c2)
-        @test MOI.canget(instance, MOI.ConstraintFunction(), c2)
+        @test MOI.canget(instance, MOI.ConstraintSet(), typeof(c2))
+        @test MOI.canget(instance, MOI.ConstraintFunction(), typeof(c2))
         #=
             To allow for permutations in the sets and variable vectors
             we're going to sort according to the weights
@@ -152,7 +152,7 @@ function int2test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 3 atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.VariablePrimal(), v)
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0,1,2] atol=atol rtol=rtol
 
             @test MOI.canget(instance, MOI.DualStatus()) == false
@@ -178,7 +178,7 @@ function int2test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 5 atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.VariablePrimal(), v)
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1,1,2] atol=atol rtol=rtol
         end
     end
@@ -223,8 +223,8 @@ function int2test(solver::Function, config::TestConfig)
         sos2 = MOI.SOS2([5.0, 4.0, 7.0, 2.0, 1.0])
         c = MOI.addconstraint!(instance, vv, sos2)
 
-        @test MOI.canget(instance, MOI.ConstraintSet(), c)
-        @test MOI.canget(instance, MOI.ConstraintFunction(), c)
+        @test MOI.canget(instance, MOI.ConstraintSet(), typeof(c))
+        @test MOI.canget(instance, MOI.ConstraintFunction(), typeof(c))
         #=
             To allow for permutations in the sets and variable vectors
             we're going to sort according to the weights
@@ -255,7 +255,7 @@ function int2test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 15.0 atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.VariablePrimal(), v)
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 3.0, 12.0] atol=atol rtol=rtol
 
             @test MOI.canget(instance, MOI.DualStatus()) == false
@@ -281,7 +281,7 @@ function int2test(solver::Function, config::TestConfig)
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 30.0 atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.VariablePrimal(), v)
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [0.0, 0.0, 2.0, 2.0, 0.0, 2.0, 0.0, 0.0, 6.0, 24.0] atol=atol rtol=rtol
 
             @test MOI.canget(instance, MOI.DualStatus()) == false
@@ -395,7 +395,7 @@ function knapsacktest(solver::Function, config::TestConfig)
         @test MOI.canget(instance, MOI.ObjectiveValue())
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 16 atol=atol rtol=rtol
 
-        @test MOI.canget(instance, MOI.VariablePrimal(), v)
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
         @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ [1, 0, 0, 1, 1] atol=atol rtol=rtol
     end
 end

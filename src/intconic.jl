@@ -45,7 +45,7 @@ function intsoc1test(solver::Function; atol=Base.rtoldefault(Float64), rtol=Base
             @test MOI.canget(instance, MOI.ObjectiveValue())
             @test MOI.get(instance, MOI.ObjectiveValue()) ≈ -2 atol=atol rtol=rtol
 
-            @test MOI.canget(instance, MOI.VariablePrimal(), x)
+            @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
             @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ 1 atol=atol rtol=rtol
             @test MOI.get(instance, MOI.VariablePrimal(), y) ≈ 1 atol=atol rtol=rtol
             @test MOI.get(instance, MOI.VariablePrimal(), z) ≈ 0 atol=atol rtol=rtol
