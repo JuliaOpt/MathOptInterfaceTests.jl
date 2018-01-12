@@ -145,7 +145,7 @@ function linear1test(solver::Function, config::TestConfig)
 
     if config.query
         # Test that the modifcation of v has not affected the instance
-        @test MOI.canget(instance, MOI.ConstraintFunction(), c)
+        @test MOI.canget(instance, MOI.ConstraintFunction(), typeof(c))
         vars = MOI.get(instance, MOI.ConstraintFunction(), c).variables
         @test vars == [v[1], v[2]] || vars == [v[2], v[1]]
         @test MOI.canget(instance, MOI.ObjectiveFunction())
@@ -360,7 +360,7 @@ function linear1test(solver::Function, config::TestConfig)
     end
 
     if config.query
-        @test MOI.canget(instance, MOI.ConstraintFunction(), c2)
+        @test MOI.canget(instance, MOI.ConstraintFunction(), typeof(c2))
         @test MOI.get(instance, MOI.ConstraintFunction(), c2) ≈ cf2
     end
 
