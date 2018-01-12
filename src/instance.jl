@@ -1,5 +1,7 @@
 # TODO: Move generic instance tests from MOIU to here
 
+struct UnknownSet <: MOI.AbstractSet end
+
 function nametest(instance::MOI.AbstractInstance)
     @testset "Name test" begin
         @test MOI.get(instance, MOI.NumberOfVariables()) == 0
@@ -97,7 +99,50 @@ function emptytest(instance::MOI.AbstractInstance)
     @test !MOI.isvalid(instance, c)
 end
 
-function copytest(src::MOI.AbstractInstance, dest::MOI.AbstractInstance)
+abstract type BadInstance <: MOI.AbstractInstance end
+MOI.get(src::BadInstance, ::MOI.ListOfInstanceAttributesSet) = MOI.AbstractInstanceAttribute[]
+MOI.get(src::BadInstance, ::MOI.ListOfVariableIndices) = [MOI.VariableIndex(1)]
+MOI.get(src::BadInstance, ::MOI.ListOfVariableAttributesSet) = MOI.AbstractVariableAttribute[]
+MOI.get(src::BadInstance, ::MOI.ListOfConstraints) = [(MOI.SingleVariable, MOI.EqualTo{Float64})]
+MOI.get(src::BadInstance, ::MOI.ListOfConstraintIndices{F,S}) where {F,S} = [MOI.ConstraintIndex{F,S}(1)]
+MOI.get(src::BadInstance, ::MOI.ConstraintFunction, ::MOI.ConstraintIndex{MOI.SingleVariable,MOI.EqualTo{Float64}}) = MOI.SingleVariable(MOI.VariableIndex(1))
+MOI.get(src::BadInstance, ::MOI.ConstraintSet, ::MOI.ConstraintIndex{MOI.SingleVariable,MOI.EqualTo{Float64}}) = MOI.EqualTo(0.0)
+MOI.get(src::BadInstance, ::MOI.ListOfConstraintAttributesSet) = MOI.AbstractConstraintAttribute[]
+
+struct BadConstraintInstance <: BadInstance end
+MOI.get(src::BadConstraintInstance, ::MOI.ListOfConstraints) = [(MOI.SingleVariable, MOI.EqualTo{Float64}), (MOI.SingleVariable, UnknownSet)]
+MOI.get(src::BadInstance, ::MOI.ConstraintFunction, ::MOI.ConstraintIndex{MOI.SingleVariable,UnknownSet}) = MOI.SingleVariable(MOI.VariableIndex(1))
+MOI.get(src::BadInstance, ::MOI.ConstraintSet, ::MOI.ConstraintIndex{MOI.SingleVariable,UnknownSet}) = UnknownSet()
+
+struct BadInstanceAttribute <: MOI.AbstractInstanceAttribute end
+struct BadInstanceAttributeInstance <: BadInstance end
+MOI.canget(src::BadInstanceAttributeInstance, ::BadInstanceAttribute) = true
+MOI.get(src::BadInstanceAttributeInstance, ::BadInstanceAttribute) = 0
+MOI.get(src::BadInstanceAttributeInstance, ::MOI.ListOfInstanceAttributesSet) = MOI.AbstractInstanceAttribute[BadInstanceAttribute()]
+
+struct BadVariableAttribute <: MOI.AbstractVariableAttribute end
+struct BadVariableAttributeInstance <: BadInstance end
+MOI.canget(src::BadVariableAttributeInstance, ::BadVariableAttribute, ::Type{MOI.VariableIndex}) = true
+MOI.get(src::BadVariableAttributeInstance, ::BadVariableAttribute, ::Vector{MOI.VariableIndex}) = [0]
+MOI.get(src::BadVariableAttributeInstance, ::MOI.ListOfVariableAttributesSet) = MOI.AbstractVariableAttribute[BadVariableAttribute()]
+
+struct BadConstraintAttribute <: MOI.AbstractConstraintAttribute end
+struct BadConstraintAttributeInstance <: BadInstance end
+MOI.canget(src::BadConstraintAttributeInstance, ::BadConstraintAttribute, ::Type{<:MOI.ConstraintIndex}) = true
+MOI.get(src::BadConstraintAttributeInstance, ::BadConstraintAttribute, ::Vector{<:MOI.ConstraintIndex}) = [0]
+MOI.get(src::BadConstraintAttributeInstance, ::MOI.ListOfConstraintAttributesSet) = MOI.AbstractConstraintAttribute[BadConstraintAttribute()]
+
+function failcopytest(dest::MOI.AbstractInstance, src::MOI.AbstractInstance, expected_status)
+    copyresult = MOI.copy!(dest, src)
+    @test copyresult.status == expected_status
+end
+
+failcopytestc(dest::MOI.AbstractInstance) = failcopytest(dest, BadConstraintInstance(), MOI.CopyUnsupportedConstraint)
+failcopytestia(dest::MOI.AbstractInstance) = failcopytest(dest, BadInstanceAttributeInstance(), MOI.CopyUnsupportedAttribute)
+failcopytestva(dest::MOI.AbstractInstance) = failcopytest(dest, BadVariableAttributeInstance(), MOI.CopyUnsupportedAttribute)
+failcopytestca(dest::MOI.AbstractInstance) = failcopytest(dest, BadConstraintAttributeInstance(), MOI.CopyUnsupportedAttribute)
+
+function copytest(dest::MOI.AbstractInstance, src::MOI.AbstractInstance)
     v = MOI.addvariables!(src, 3)
     csv = MOI.addconstraint!(src, MOI.SingleVariable(v[2]), MOI.EqualTo(2.))
     cvv = MOI.addconstraint!(src, MOI.VectorOfVariables(v), MOI.Nonnegatives(3))
@@ -142,9 +187,12 @@ function copytest(src::MOI.AbstractInstance, dest::MOI.AbstractInstance)
     @test MOI.get(dest, MOI.ConstraintFunction(), dict[cva]) ≈ MOI.VectorAffineFunction([1, 2], [dict[v[3]], dict[v[2]]], ones(5), [-3.0,-2.0])
     @test MOI.canget(dest, MOI.ConstraintSet(), typeof(dict[cva]))
     @test MOI.get(dest, MOI.ConstraintSet(), dict[cva]) == MOI.Zeros(2)
-end
 
-struct UnknownSet <: MOI.AbstractSet end
+    @test MOI.canget(dest, MOI.ObjectiveFunction())
+    @test MOI.get(dest, MOI.ObjectiveFunction()) ≈ MOI.ScalarAffineFunction([dict[v[1]], dict[v[2]], dict[v[3]]], [-3.0, -2.0, -4.0], 0.0)
+    @test MOI.canget(dest, MOI.ObjectiveSense())
+    @test MOI.get(dest, MOI.ObjectiveSense()) == MOI.MinSense
+end
 
 function canaddconstrainttest(instance::MOI.AbstractInstance, ::Type{GoodT}, ::Type{BadT}) where {GoodT, BadT}
     v = MOI.addvariable!(instance)
