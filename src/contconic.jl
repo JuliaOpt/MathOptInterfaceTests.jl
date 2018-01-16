@@ -714,6 +714,106 @@ function rotatedsoc2test(solver::Function, config::TestConfig)
     end
 end
 
+function rotatedsoc3test(solver::Function, config::TestConfig)
+    atol = config.atol
+    rtol = config.rtol
+    # Problem SOCRotated3
+    # max v
+    # s.t.
+    #      x[1:5] ≥ 0
+    #      0 ≤ u ≤ 5
+    #      v
+    #      t1 == 1
+    #      t2 == 1
+    # [t1/√2, t2/√2, x] in SOC7
+    # [x1/√2, u/√2,  v] in SOC3
+
+    instance = solver()
+
+    x = MOI.addvariables!(instance, 5)
+    u = MOI.addvariable!(instance)
+    v = MOI.addvariable!(instance)
+    t = MOI.addvariables!(instance, 2)
+
+    ct1 = MOI.addconstraint!(instance, MOI.SingleVariable(t[1]), MOI.EqualTo(1.0))
+    ct2 = MOI.addconstraint!(instance, MOI.SingleVariable(t[2]), MOI.EqualTo(1.0))
+    cx  = MOI.addconstraint!(instance, MOI.VectorOfVariables(x), MOI.Nonnegatives(5))
+    cu1 = MOI.addconstraint!(instance, MOI.SingleVariable(u), MOI.GreaterThan(0.0))
+    cu2 = MOI.addconstraint!(instance, MOI.SingleVariable(u), MOI.LessThan(5.0))
+
+    c1 = MOI.addconstraint!(instance, MOI.VectorAffineFunction(collect(1:7), [t; x], [1/√2; 1/√2; ones(5)], zeros(7)), MOI.RotatedSecondOrderCone(7))
+    c2 = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1, 2, 3], [x[1], u, v], [1/√2; 1/√2; 1.0], zeros(3)), MOI.RotatedSecondOrderCone(3))
+
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.EqualTo{Float64}}()) == 2
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorOfVariables,MOI.Nonnegatives}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.LessThan{Float64}}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 1
+    @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.RotatedSecondOrderCone}()) == 2
+
+    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([v],[1.0],0.0))
+    MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
+
+    if config.solve
+        MOI.optimize!(instance)
+
+        @test MOI.canget(instance, MOI.TerminationStatus())
+        @test MOI.get(instance, MOI.TerminationStatus()) == MOI.Success
+
+        @test MOI.canget(instance, MOI.PrimalStatus())
+        @test MOI.get(instance, MOI.PrimalStatus()) == MOI.FeasiblePoint
+        if config.duals
+            @test MOI.canget(instance, MOI.DualStatus())
+            @test MOI.get(instance, MOI.DualStatus()) == MOI.FeasiblePoint
+        end
+
+        @test MOI.canget(instance, MOI.ObjectiveValue())
+        @test MOI.get(instance, MOI.ObjectiveValue()) ≈ √5 atol=atol rtol=rtol
+
+        @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
+        @show MOI.get(instance, MOI.VariablePrimal(), x)
+        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ [1, 0, 0, 0, 0] atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), u) ≈ 5 atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), v) ≈ √5 atol=atol rtol=rtol
+        @test MOI.get(instance, MOI.VariablePrimal(), t) ≈ ones(2) atol=atol rtol=rtol
+
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(cx))
+        @test MOI.get(instance, MOI.ConstraintPrimal(), cx) ≈ [1, 0, 0, 0, 0] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(cu1))
+        @test MOI.get(instance, MOI.ConstraintPrimal(), cu1) ≈ 5 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(cu2))
+        @test MOI.get(instance, MOI.ConstraintPrimal(), cu2) ≈ 5 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(ct1))
+        @test MOI.get(instance, MOI.ConstraintPrimal(), ct1) ≈ 1.0 atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(ct1))
+        @test MOI.get(instance, MOI.ConstraintPrimal(), ct1) ≈ 1.0 atol=atol rtol=rtol
+
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(c1))
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c1) ≈ [1/√2, 1/√2, 1.0, 0.0, 0.0, 0.0, 0.0] atol=atol rtol=rtol
+        @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(c2))
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c2) ≈ [1/√2, 5/√2, √5] atol=atol rtol=rtol
+
+        if config.duals
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(cx))
+            @show MOI.get(instance, MOI.ConstraintDual(), cx)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(cu1))
+            @test MOI.get(instance, MOI.ConstraintDual(), cu1) ≈ 0.0 atol=atol rtol=rtol
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(cu2))
+            @show MOI.get(instance, MOI.ConstraintDual(), cu2)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(ct1))
+            @show MOI.get(instance, MOI.ConstraintDual(), ct1)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(ct1))
+            @show MOI.get(instance, MOI.ConstraintDual(), ct1)
+
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c1))
+            @show MOI.get(instance, MOI.ConstraintDual(), c1)
+            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c2))
+            @show MOI.get(instance, MOI.ConstraintDual(), c2)
+        end
+    end
+end
+
+
 const rsoctests = Dict("rotatedsoc1v" => rotatedsoc1vtest,
                        "rotatedsoc1f" => rotatedsoc1ftest,
                        "rotatedsoc2"  => rotatedsoc2test)
