@@ -150,7 +150,7 @@ function linear1test(solver::Function, config::TestConfig)
         @test vars == [v[1], v[2]] || vars == [v[2], v[1]]
         @test MOI.canget(instance, MOI.ObjectiveFunction())
         vars = MOI.get(instance, MOI.ObjectiveFunction()).variables
-        @test vars == [v[1], v[2]] || vars == [v[2], v[1]]
+        @test vars == [v[1]]
     end
 
     vc3 = MOI.addconstraint!(instance, MOI.SingleVariable(v[3]), MOI.GreaterThan(0.0))
@@ -370,7 +370,7 @@ function linear1test(solver::Function, config::TestConfig)
 
     if config.query
         f = MOI.get(instance, MOI.ConstraintFunction(), c2)
-        @test (f.variables == [v[2], z] && f.coefficients == [-1.0, 0.0]) || (f.variables == [z, v[2]] && f.coefficients == [0.0, -1.0])
+        @test (f.variables == [v[2], z] && f.coefficients == [-1.0, 0.0]) || (f.variables == [z, v[2]] && f.coefficients == [0.0, -1.0]) || (f.variables == [v[2]] && f.coefficients == [-1.0])
 
         @test MOI.canget(instance, MOI.ListOfVariableIndices())
         vrs = MOI.get(instance, MOI.ListOfVariableIndices())
