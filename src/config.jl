@@ -5,6 +5,16 @@ struct TestConfig
     query::Bool # can get objective function, and constraint functions, and constraint sets
     duals::Bool # test dual solutions
     infeas_certificates::Bool # check for infeasibility certificates when appropriate
+    function TestConfig(;atol::Float64 = 1e-8, rtol::Float64 = 1e-8, solve::Bool = true, query::Bool = true, duals::Bool = true, infeas_certificates::Bool = true)
+        new(
+            atol,
+            rtol,
+            solve,
+            query,
+            duals,
+            infeas_certificates,
+            )
+    end
 end
 
 """
