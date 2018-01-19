@@ -149,8 +149,7 @@ function linear1test(solver::Function, config::TestConfig)
         vars = MOI.get(instance, MOI.ConstraintFunction(), c).variables
         @test vars == [v[1], v[2]] || vars == [v[2], v[1]]
         @test MOI.canget(instance, MOI.ObjectiveFunction())
-        vars = MOI.get(instance, MOI.ObjectiveFunction()).variables
-        @test vars == [v[1], v[2]] || vars == [v[2], v[1]]
+        @test MOI.ScalarAffineFunction([v[1]], [1.0], 0.0) ≈ MOI.get(instance, MOI.ObjectiveFunction())
     end
 
     vc3 = MOI.addconstraint!(instance, MOI.SingleVariable(v[3]), MOI.GreaterThan(0.0))
@@ -369,8 +368,7 @@ function linear1test(solver::Function, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 1
 
     if config.query
-        f = MOI.get(instance, MOI.ConstraintFunction(), c2)
-        @test (f.variables == [v[2], z] && f.coefficients == [-1.0, 0.0]) || (f.variables == [z, v[2]] && f.coefficients == [0.0, -1.0])
+        @test MOI.get(instance, MOI.ConstraintFunction(), c2) ≈ MOI.ScalarAffineFunction([v[2], z], [-1.0, 0.0], 0.0)
 
         @test MOI.canget(instance, MOI.ListOfVariableIndices())
         vrs = MOI.get(instance, MOI.ListOfVariableIndices())
