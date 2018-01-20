@@ -379,7 +379,7 @@ function knapsacktest(solver::Function, config::TestConfig)
     MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(v, [5.0, 3.0, 2.0, 7.0, 4.0], 0.0))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
 
-    if MOI.canset(instance, MOI.VariablePrimalStart(), v)
+    if MOI.canset(instance, MOI.VariablePrimalStart(), MOI.VariableIndex)
         MOI.set!(instance, MOI.VariablePrimalStart(), v, [0.0, 0.0, 0.0, 0.0, 0.0])
     end
 
