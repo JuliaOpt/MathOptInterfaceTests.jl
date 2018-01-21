@@ -1312,20 +1312,18 @@ function sdp2test(solver::Function, config::TestConfig)
     x = MOI.addvariables!(instance, 7)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 7
 
-    c = [0.0,0.0,0.0,0.0,0.0,0.0,1.0]
-    b = [10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
-    I =  [1,  2,   8,   9,           10,  11,  1,  3,   8,                 9,                  10,                 11,  1,  4,   8,  9,  10, 11, 1,  5,   8,    1,  6,   8,     9,             10,    11,  1,  7,  8,  9, 10,  11,    8, 10]
-    J =  [1,  1,   1,   1,            1,   1,  2,  2,   2,                 2,                   2,                  2,  3,  3,   3,  3,  3,  3,  4,  4,   4,    5,  5,   5,     5,              5,     5,  6,  6,  6,  6,  6,   6,    7,  7]
-    V = -[1.0,1.0,-0.45,0.45/sqrt(2),-0.45,0.0,1.0,1.0,-0.7681980515339464,0.225,-0.13180194846605373,0.0,1.0,1.0,-0.9,0.0,0.0,0.0,1.0,1.0,-0.225,1.0,1.0,-0.1125,0.1125/sqrt(2),-0.1125,0.0,1.0,1.0,0.0,0.0,-0.225,0.0,1.0,1.0]
-
-    A = sparse(I, J, V, length(b), length(c))
-
-    f = MOI.VectorAffineFunction(I, x[J], V, b)
-
-    c1 = MOI.addconstraint!(instance, MOIU.eachscalar(f)[1], MOI.GreaterThan(0.0))
-    c2 = MOI.addconstraint!(instance, MOIU.eachscalar(f)[2:7], MOI.Nonpositives(6))
-    c3 = MOI.addconstraint!(instance, MOIU.eachscalar(f)[8:10], MOI.PositiveSemidefiniteConeTriangle(2))
-    c4 = MOI.addconstraint!(instance, MOIU.eachscalar(f)[11], MOI.EqualTo(0.))
+    η = 10.0
+    c1 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(x[1:6], -ones(6), η), MOI.GreaterThan(0.0))
+    c2 = MOI.addconstraint!(instance, MOI.VectorAffineFunction(collect(1:6), x[1:6], -ones(6), zeros(6)), MOI.Nonpositives(6))
+    α = 0.8
+    δ = 0.9
+    c3 = MOI.addconstraint!(instance, MOI.VectorAffineFunction([fill(1, 7); fill(2, 5);     fill(3, 6)],
+                                                               [x[1:7];     x[1:3]; x[5:6]; x[1:3]; x[5:7]],
+                                                               [ δ/2,       α,   δ, δ/4, δ/8,      0.0, -1.0,
+                                                                -δ/(2*√2), -δ/4, 0,     -δ/(8*√2), 0.0,
+                                                                 δ/2,     δ-α,   0,      δ/8,      δ/4, -1.0],
+                                                               zeros(3)), MOI.PositiveSemidefiniteConeTriangle(2))
+    c4 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x[1:3]; x[5:6]], zeros(5), 0.0), MOI.EqualTo(0.))
 
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.Nonpositives}()) == 1
@@ -1348,50 +1346,25 @@ function sdp2test(solver::Function, config::TestConfig)
         end
 
         @test MOI.canget(instance, MOI.VariablePrimal(), MOI.VariableIndex)
-        xv = MOI.get(instance, MOI.VariablePrimal(), x)
-        @test all(xv[1:6] .> -atol)
-
-        con = A * xv + b
+        @test MOI.get(instance, MOI.VariablePrimal(), x) ≈ [2η/3, 0, η/3, 0, 0, 0, η*δ*(1 - 1/√3)/2] atol=atol rtol=rtol
 
         @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(c1))
-        @test MOI.get(instance, MOI.ConstraintPrimal(), c1) ≈ con[1] atol=atol rtol=rtol
         @test MOI.get(instance, MOI.ConstraintPrimal(), c1) ≈ 0.0 atol=atol rtol=rtol
         @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(c2))
-        @test MOI.get(instance, MOI.ConstraintPrimal(), c2) ≈ con[2:7] atol=atol rtol=rtol
-        @test all(MOI.get(instance, MOI.ConstraintPrimal(), c2) .< atol)
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c2) ≈ [-2η/3, 0, -η/3, 0, 0, 0] atol=atol rtol=rtol
         @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(c3))
-        Xv = MOI.get(instance, MOI.ConstraintPrimal(), c3)
-        @test Xv ≈ con[8:10] atol=atol rtol=rtol
-        s2 = sqrt(2)
-        Xm = [Xv[1]    Xv[2]/s2
-              Xv[2]/s2 Xv[3]]
-        @test eigmin(Xm) > -atol
+        @test MOI.get(instance, MOI.ConstraintPrimal(), c3) ≈ [η*δ*(1/√3+1/3)/2, -η*δ/(3*√2), η*δ*(1/√3-1/3)/2] atol=atol rtol=rtol
         @test MOI.canget(instance, MOI.ConstraintPrimal(), typeof(c4))
-        @test MOI.get(instance, MOI.ConstraintPrimal(), c4) ≈ con[11] atol=atol rtol=rtol
         @test MOI.get(instance, MOI.ConstraintPrimal(), c4) ≈ 0.0 atol=atol rtol=rtol
 
         if config.duals
             @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c1))
-            y1 = MOI.get(instance, MOI.ConstraintDual(), c1)
-            @test y1 > -atol
+            @test MOI.get(instance, MOI.ConstraintDual(), c1) ≈ δ*(1-1/√3)/2 atol=atol rtol=rtol
             @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c2))
-            y2 = MOI.get(instance, MOI.ConstraintDual(), c2)
-            @test all(MOI.get(instance, MOI.ConstraintDual(), c2) .< atol)
-
+            @test MOI.get(instance, MOI.ConstraintDual(), c2) ≈ [0, -α/√3+δ/(2*√6)*(2*√2-1), 0, -3δ*(1-1/√3)/8, -3δ*(1-1/√3)/8, -δ*(3 - 2*√3 + 1/√3)/8] atol=atol rtol=rtol
             @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c3))
-            y3 = MOI.get(instance, MOI.ConstraintDual(), c3)
-            s2 = sqrt(2)
-            Ym = [y3[1]    y3[2]/s2
-                  y3[2]/s2 y3[3]]
-            @test eigmin(Ym) > -atol
-
-            @test MOI.canget(instance, MOI.ConstraintDual(), typeof(c4))
-            y4 = MOI.get(instance, MOI.ConstraintDual(), c4)
-
-            y = [y1; y2; y3; y4]
-            @test dot(c, xv) ≈ dot(b, y) atol=atol rtol=rtol
-            A[9,:] *= 2 # See duality note for PositiveSemidefiniteConeTriangle, 9 correspond to a off-diagonal entry
-            @test A' * y ≈ -c atol=atol rtol=rtol
+            @test MOI.get(instance, MOI.ConstraintDual(), c3) ≈ [(1-1/√3)/2, 1/√6, (1+1/√3)/2] atol=atol rtol=rtol
+            # Dual of c4 could be anything
         end
     end
 end
