@@ -363,6 +363,12 @@ function linear1test(solver::Function, config::TestConfig)
         @test MOI.get(instance, MOI.ConstraintFunction(), c2) ≈ cf2
     end
 
+    # delete variable x to get :
+    # max 2y
+    # s.t. y + z == 2
+    # - y >= 0
+    # y >= 0, z = 0
+
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 2
     MOI.delete!(instance, v[1])
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 1
