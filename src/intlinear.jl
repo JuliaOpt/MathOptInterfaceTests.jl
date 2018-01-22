@@ -43,7 +43,7 @@ function int1test(solver::Function, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.ZeroOne}()) == 1
 
     objf = MOI.ScalarAffineFunction(v, [1.1, 2.0, 5.0], 0.0)
-    MOI.set!(instance, MOI.ObjectiveFunction(), objf)
+    MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), objf)
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
 
     @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
@@ -133,7 +133,7 @@ function int2test(solver::Function, config::TestConfig)
         @test cf_sos.variables[p] == v[[1,3]]
 
         objf = MOI.ScalarAffineFunction(v, [2.0, 1.0, 1.0], 0.0)
-        MOI.set!(instance, MOI.ObjectiveFunction(), objf)
+        MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), objf)
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
 
@@ -236,7 +236,7 @@ function int2test(solver::Function, config::TestConfig)
         @test cf_sos.variables[p] == v[[8,7,5,4,6]]
 
         objf = MOI.ScalarAffineFunction([v[9], v[10]], [1.0, 1.0], 0.0)
-        MOI.set!(instance, MOI.ObjectiveFunction(), objf)
+        MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), objf)
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
 
@@ -322,7 +322,7 @@ function int3test(solver::Function, config::TestConfig)
 
     c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(vcat(z, b), vcat(1.0, fill(-0.5 / 40, 10)), 0.0), MOI.Interval(0.0, 0.999))
 
-    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(vcat(z, b[1:3]), vcat(1.0, fill(-0.5 / 40, 3)), 0.0))
+    MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), MOI.ScalarAffineFunction(vcat(z, b[1:3]), vcat(1.0, fill(-0.5 / 40, 3)), 0.0))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
 
     if config.solve
@@ -376,7 +376,7 @@ function knapsacktest(solver::Function, config::TestConfig)
     c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(v, [2.0, 8.0, 4.0, 2.0, 5.0], 0.0), MOI.LessThan(10.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}()) == 1
 
-    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(v, [5.0, 3.0, 2.0, 7.0, 4.0], 0.0))
+    MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), MOI.ScalarAffineFunction(v, [5.0, 3.0, 2.0, 7.0, 4.0], 0.0))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
 
     if MOI.canset(instance, MOI.VariablePrimalStart(), MOI.VariableIndex)

@@ -17,7 +17,7 @@ function intsoc1test(solver::Function; atol=Base.rtoldefault(Float64), rtol=Base
 
         x,y,z = MOI.addvariables!(instance, 3)
 
-        MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction([y,z],[-2.0,-1.0],0.0))
+        MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), MOI.ScalarAffineFunction([y,z],[-2.0,-1.0],0.0))
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
 
         ceq = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[x],[1.0],[-1.0]), MOI.Zeros(1))
