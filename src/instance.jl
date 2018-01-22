@@ -8,9 +8,10 @@ function nametest(instance::MOI.AbstractInstance)
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}()) == 0
 
         v = MOI.addvariables!(instance, 2)
-        @test MOI.canset(instance, MOI.VariableName(), typeof(v[1]))
+        @test MOI.canget(instance, MOI.VariableName(), typeof(v[1]))
         @test MOI.get(instance, MOI.VariableName(), v[1]) == ""
 
+        @test MOI.canset(instance, MOI.VariableName(), typeof(v[1]))
         MOI.set!(instance, MOI.VariableName(), v[1], "Var1")
         MOI.set!(instance, MOI.VariableName(), v[2], "Var2")
 
