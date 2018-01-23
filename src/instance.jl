@@ -88,7 +88,7 @@ function emptytest(instance::MOI.AbstractInstance)
     v = MOI.addvariables!(instance, 3)
     vc = MOI.addconstraint!(instance, MOI.VectorOfVariables(v), MOI.Nonnegatives(3))
     c = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,1,2,2], [v;v[2];v[3]], ones(5), [-3.0,-2.0]), MOI.Zeros(2))
-    MOI.set!(instance, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(v, [-3.0, -2.0, -4.0], 0.0))
+    MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), MOI.ScalarAffineFunction(v, [-3.0, -2.0, -4.0], 0.0))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
 
     @test !MOI.isempty(instance)
@@ -156,7 +156,7 @@ function copytest(dest::MOI.AbstractInstance, src::MOI.AbstractInstance)
     cvv = MOI.addconstraint!(src, MOI.VectorOfVariables(v), MOI.Nonnegatives(3))
     csa = MOI.addconstraint!(src, MOI.ScalarAffineFunction([v[3], v[1]], [1., 3.], 2.), MOI.LessThan(2.))
     cva = MOI.addconstraint!(src, MOI.VectorAffineFunction([1, 2], [v[3], v[2]], ones(5), [-3.0,-2.0]), MOI.Zeros(2))
-    MOI.set!(src, MOI.ObjectiveFunction(), MOI.ScalarAffineFunction(v, [-3.0, -2.0, -4.0], 0.0))
+    MOI.set!(src, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), MOI.ScalarAffineFunction(v, [-3.0, -2.0, -4.0], 0.0))
     MOI.set!(src, MOI.ObjectiveSense(), MOI.MinSense)
 
     copyresult = MOI.copy!(dest, src)
@@ -196,8 +196,8 @@ function copytest(dest::MOI.AbstractInstance, src::MOI.AbstractInstance)
     @test MOI.canget(dest, MOI.ConstraintSet(), typeof(dict[cva]))
     @test MOI.get(dest, MOI.ConstraintSet(), dict[cva]) == MOI.Zeros(2)
 
-    @test MOI.canget(dest, MOI.ObjectiveFunction())
-    @test MOI.get(dest, MOI.ObjectiveFunction()) ≈ MOI.ScalarAffineFunction([dict[v[1]], dict[v[2]], dict[v[3]]], [-3.0, -2.0, -4.0], 0.0)
+    @test MOI.canget(dest, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
+    @test MOI.get(dest, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}()) ≈ MOI.ScalarAffineFunction([dict[v[1]], dict[v[2]], dict[v[3]]], [-3.0, -2.0, -4.0], 0.0)
     @test MOI.canget(dest, MOI.ObjectiveSense())
     @test MOI.get(dest, MOI.ObjectiveSense()) == MOI.MinSense
 end
