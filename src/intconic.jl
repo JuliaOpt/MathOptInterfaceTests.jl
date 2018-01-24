@@ -1,7 +1,7 @@
 # Integer conic problems
 
-function intsoc1test(solver::Function; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
-    #@test MOI.supportsproblem(solver, MOI.ScalarAffineFunction{Float64}, 
+function intsoc1test(instance::MOI.AbstractInstance; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
+    #@test MOI.supportsproblem(instance, MOI.ScalarAffineFunction{Float64}, 
     #    [(MOI.VectorAffineFunction{Float64},MOI.Zeros),
     #     (MOI.SingleVariable,MOI.ZeroOne),
     #     (MOI.VectorOfVariables,MOI.SecondOrderCone)])
@@ -13,7 +13,8 @@ function intsoc1test(solver::Function; atol=Base.rtoldefault(Float64), rtol=Base
         #      x >= ||(y,z)||
         #      (y,z) binary
 
-        instance = solver()
+        MOI.empty!(instance)
+        @test MOI.isempty(instance)
 
         x,y,z = MOI.addvariables!(instance, 3)
 
@@ -54,10 +55,10 @@ function intsoc1test(solver::Function; atol=Base.rtoldefault(Float64), rtol=Base
     end
 end
 
-function intsoctests(solver::Function; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
-    intsoc1test(solver, atol=atol, rtol=rtol)
+function intsoctests(instance::MOI.AbstractInstance; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
+    intsoc1test(instance, atol=atol, rtol=rtol)
 end
 
-function intconictests(solver::Function; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
-    intsoctests(solver, atol=atol, rtol=rtol)
+function intconictests(instance::MOI.AbstractInstance; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
+    intsoctests(instance, atol=atol, rtol=rtol)
 end
