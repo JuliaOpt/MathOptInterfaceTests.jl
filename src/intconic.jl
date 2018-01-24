@@ -1,7 +1,7 @@
 # Integer conic problems
 
 function intsoc1test(instance::MOI.AbstractInstance; atol=Base.rtoldefault(Float64), rtol=Base.rtoldefault(Float64))
-    #@test MOI.supportsproblem(instance, MOI.ScalarAffineFunction{Float64}, 
+    #@test MOI.supportsproblem(instance, MOI.ScalarAffineFunction{Float64},
     #    [(MOI.VectorAffineFunction{Float64},MOI.Zeros),
     #     (MOI.SingleVariable,MOI.ZeroOne),
     #     (MOI.VectorOfVariables,MOI.SecondOrderCone)])
