@@ -18,7 +18,9 @@ function intsoc1test(instance::MOI.AbstractInstance; atol=Base.rtoldefault(Float
 
         x,y,z = MOI.addvariables!(instance, 3)
 
+        @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
         MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), MOI.ScalarAffineFunction([y,z],[-2.0,-1.0],0.0))
+        @test MOI.canset(instance, MOI.ObjectiveSense())
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
 
         ceq = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[x],[1.0],[-1.0]), MOI.Zeros(1))
