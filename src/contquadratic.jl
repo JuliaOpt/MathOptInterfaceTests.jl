@@ -28,7 +28,9 @@ function qp1test(instance::MOI.AbstractInstance, config::TestConfig)
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}()) == 2
 
         obj = MOI.ScalarQuadraticFunction(MOI.VariableIndex[], Float64[], v[[1,1,2,2,3]], v[[1,2,2,3,3]], [2.0, 1.0, 2.0, 1.0, 2.0], 0.0)
+        @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarQuadraticFunction{Float64}}())
         MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarQuadraticFunction{Float64}}(), obj)
+        @test MOI.canset(instance, MOI.ObjectiveSense())
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MinSense
 
@@ -89,7 +91,9 @@ function qp2test(instance::MOI.AbstractInstance, config::TestConfig)
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}()) == 2
 
         obj = MOI.ScalarQuadraticFunction(v, [0.0,0.0,0.0],[v[1], v[1], v[1], v[2], v[2], v[3], v[3]], [v[1], v[2], v[2], v[2], v[3], v[3], v[3]], [2.0, 0.5, 0.5, 2.0, 1.0, 1.0, 1.0], 0.0)
+        @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarQuadraticFunction{Float64}}())
         MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarQuadraticFunction{Float64}}(), obj)
+        @test MOI.canset(instance, MOI.ObjectiveSense())
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MinSense
 
@@ -122,7 +126,9 @@ function qp2test(instance::MOI.AbstractInstance, config::TestConfig)
 
         # change objective to Max -2(x^2 + xy + y^2 + yz + z^2)
         obj2 = MOI.ScalarQuadraticFunction(v, [0.0,0.0,0.0],[v[1], v[1], v[1], v[2], v[2], v[3], v[3]], [v[1], v[2], v[2], v[2], v[3], v[3], v[3]], [-4.0, -1.0, -1.0, -4.0, -2.0, -2.0, -2.0], 0.0)
+        @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarQuadraticFunction{Float64}}())
         MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarQuadraticFunction{Float64}}(), obj2)
+        @test MOI.canset(instance, MOI.ObjectiveSense())
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
 
@@ -184,7 +190,9 @@ function qp3test(instance::MOI.AbstractInstance, config::TestConfig)
                 [x,y,x], [x,y,y], [4.0, 2.0, 1.0],
                 1.0
               )
+        @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarQuadraticFunction{Float64}}())
         MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarQuadraticFunction{Float64}}(), obj)
+        @test MOI.canset(instance, MOI.ObjectiveSense())
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
 
         if config.solve
@@ -208,7 +216,9 @@ function qp3test(instance::MOI.AbstractInstance, config::TestConfig)
         #             x + y = 1
         # (x,y) = (1,0), obj = 3
         objf = MOI.ScalarAffineFunction([x,y], [2.0,1.0], 1.0)
+        @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
         MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), objf)
+        @test MOI.canset(instance, MOI.ObjectiveSense())
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
 
         if config.solve
@@ -268,7 +278,9 @@ function qcp1test(instance::MOI.AbstractInstance, config::TestConfig)
         c2 = MOI.addconstraint!(instance, c2f, MOI.LessThan(2.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}()) == 1
 
+        @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
         MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), MOI.ScalarAffineFunction([x,y], [1.0,1.0], 0.0))
+        @test MOI.canset(instance, MOI.ObjectiveSense())
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
 
@@ -330,7 +342,9 @@ function qcp2test(instance::MOI.AbstractInstance, config::TestConfig)
         c = MOI.addconstraint!(instance, cf, MOI.LessThan(2.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}()) == 1
 
+        @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
         MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), MOI.ScalarAffineFunction([x], [1.0], 0.0))
+        @test MOI.canset(instance, MOI.ObjectiveSense())
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MaxSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MaxSense
 
@@ -385,7 +399,9 @@ function qcp3test(instance::MOI.AbstractInstance, config::TestConfig)
         c = MOI.addconstraint!(instance, cf, MOI.LessThan(2.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}()) == 1
 
+        @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
         MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), MOI.ScalarAffineFunction([x], [-1.0], 0.0))
+        @test MOI.canset(instance, MOI.ObjectiveSense())
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MinSense
 
@@ -463,7 +479,9 @@ function socp1test(instance::MOI.AbstractInstance, config::TestConfig)
         bound = MOI.addconstraint!(instance, MOI.SingleVariable(t), MOI.GreaterThan(0.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable, MOI.GreaterThan{Float64}}()) == 1
 
+        @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
         MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), MOI.ScalarAffineFunction([t], [1.0], 0.0))
+        @test MOI.canset(instance, MOI.ObjectiveSense())
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
         @test MOI.get(instance, MOI.ObjectiveSense()) == MOI.MinSense
 
