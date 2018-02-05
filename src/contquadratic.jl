@@ -1,5 +1,3 @@
-using MathOptInterfaceUtilities # Defines isapprox for ScalarQuadraticFunction
-
 # Continuous quadratic problems
 
 function qp1test(instance::MOI.AbstractInstance, config::TestConfig)

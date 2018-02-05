@@ -1,6 +1,3 @@
-using MathOptInterfaceUtilities # Defines getindex for VectorAffineFunction
-const MOIU = MathOptInterfaceUtilities
-
 # Continuous conic problems
 
 function _lin1test(instance::MOI.AbstractInstance, config::TestConfig, vecofvars::Bool)

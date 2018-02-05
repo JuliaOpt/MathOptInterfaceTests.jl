@@ -1,5 +1,3 @@
-using MathOptInterfaceUtilities # Defines isapprox for ScalarAffineFunction
-
 # Continuous linear problems
 
 # Basic solver, query, resolve

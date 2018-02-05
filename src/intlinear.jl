@@ -1,5 +1,3 @@
-using MathOptInterfaceUtilities
-
 # MIP01 from CPLEX.jl
 function int1test(instance::MOI.AbstractInstance, config::TestConfig)
     atol = config.atol
@@ -99,7 +97,6 @@ function int1test(instance::MOI.AbstractInstance, config::TestConfig)
 end
 
 Base.isapprox(a::T, b::T; kwargs...) where T <: Union{MOI.SOS1, MOI.SOS2} = isapprox(a.weights, b.weights; kwargs...)
-Base.:(==)(a::MOI.VectorOfVariables, b::MOI.VectorOfVariables) = (a.variables == b.variables)
 
 # sos from CPLEX.jl" begin
 function int2test(instance::MOI.AbstractInstance, config::TestConfig)
