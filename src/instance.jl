@@ -12,7 +12,11 @@ function nametest(instance::MOI.AbstractInstance)
         @test MOI.get(instance, MOI.VariableName(), v[1]) == ""
 
         @test MOI.canset(instance, MOI.VariableName(), typeof(v[1]))
+        MOI.set!(instance, MOI.VariableName(), v[1], "")
+        MOI.set!(instance, MOI.VariableName(), v[2], "") # Shouldn't error with duplicate empty name
+
         MOI.set!(instance, MOI.VariableName(), v[1], "Var1")
+        @test_throws Exception MOI.set!(instance, MOI.VariableName(), v[2], "Var1")
         MOI.set!(instance, MOI.VariableName(), v[2], "Var2")
 
         @test MOI.canget(instance, MOI.VariableIndex, "Var1")
@@ -32,12 +36,17 @@ function nametest(instance::MOI.AbstractInstance)
         end
 
         c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(v, [1.0,1.0], 0.0), MOI.LessThan(1.0))
-        @test MOI.canset(instance, MOI.ConstraintName(), typeof(c))
+        c2 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(v, [-1.0,1.0], 0.0), MOI.EqualTo(0.0))
         @test MOI.canget(instance, MOI.ConstraintName(), typeof(c))
         @test MOI.get(instance, MOI.ConstraintName(), c) == ""
 
+        @test MOI.canset(instance, MOI.ConstraintName(), typeof(c))
+        MOI.set!(instance, MOI.ConstraintName(), c, "")
+        MOI.set!(instance, MOI.ConstraintName(), c2, "") # Shouldn't error with duplicate empty name
+
         MOI.set!(instance, MOI.ConstraintName(), c, "Con0")
         @test MOI.get(instance, MOI.ConstraintName(), c) == "Con0"
+        @test_throws Exception MOI.set!(instance, MOI.ConstraintName(), c2, "Con0")
 
         MOI.set!(instance, MOI.ConstraintName(), [c], ["Con1"])
         @test MOI.get(instance, MOI.ConstraintName(), [c]) == ["Con1"]
@@ -60,8 +69,6 @@ function nametest(instance::MOI.AbstractInstance)
             @test_throws KeyError MOI.get(instance, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}, "Con1")
             @test_throws KeyError MOI.get(instance, MOI.ConstraintIndex, "Con1")
         end
-
-        # TODO: Test for error when duplicate names are assigned
     end
 end
 
