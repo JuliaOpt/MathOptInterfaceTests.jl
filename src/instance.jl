@@ -211,15 +211,15 @@ end
 
 function canaddconstrainttest(instance::MOI.AbstractInstance, ::Type{GoodT}, ::Type{BadT}) where {GoodT, BadT}
     v = MOI.addvariable!(instance)
-    @test MOI.canaddconstraint(instance, MOI.SingleVariable(v), MOI.EqualTo(one(GoodT)))
-    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction([v], [one(GoodT)], one(GoodT)), MOI.EqualTo(one(GoodT)))
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.EqualTo{GoodT})
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{GoodT}, MOI.EqualTo{GoodT})
     # Bad type
-    @test !MOI.canaddconstraint(instance, MOI.ScalarAffineFunction([v], [one(BadT)], zero(BadT)), MOI.EqualTo(one(GoodT)))
-    @test !MOI.canaddconstraint(instance, MOI.ScalarAffineFunction([v], [one(BadT)], zero(BadT)), MOI.EqualTo(one(BadT)))
-    @test !MOI.canaddconstraint(instance, MOI.SingleVariable(v), MOI.EqualTo(one(BadT)))
+    @test !MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{BadT}, MOI.EqualTo{GoodT})
+    @test !MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{BadT}, MOI.EqualTo{BadT})
+    @test !MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.EqualTo{BadT})
 
-    @test MOI.canaddconstraint(instance, MOI.VectorOfVariables([v]), MOI.Zeros(1))
-    @test !MOI.canaddconstraint(instance, MOI.VectorOfVariables([v]), MOI.EqualTo(one(GoodT))) # vector in scalar
-    @test !MOI.canaddconstraint(instance, MOI.SingleVariable(v), MOI.Zeros(1)) # scalar in vector
-    @test !MOI.canaddconstraint(instance, MOI.VectorOfVariables([v, v]), UnknownSet()) # set not supported
+    @test MOI.canaddconstraint(instance, MOI.VectorOfVariables, MOI.Zeros)
+    @test !MOI.canaddconstraint(instance, MOI.VectorOfVariables, MOI.EqualTo{GoodT}) # vector in scalar
+    @test !MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.Zeros) # scalar in vector
+    @test !MOI.canaddconstraint(instance, MOI.VectorOfVariables, UnknownSet) # set not supported
 end

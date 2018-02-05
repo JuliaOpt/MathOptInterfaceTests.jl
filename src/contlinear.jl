@@ -158,10 +158,10 @@ function linear1test(instance::MOI.AbstractInstance, config::TestConfig)
     vc3 = MOI.addconstraint!(instance, MOI.SingleVariable(v[3]), MOI.GreaterThan(0.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 3
 
-    @test MOI.canmodifyconstraint(instance, c, MOI.ScalarCoefficientChange{Float64}(z, 1.0))
+    @test MOI.canmodifyconstraint(instance, c, MOI.ScalarCoefficientChange{Float64})
     MOI.modifyconstraint!(instance, c, MOI.ScalarCoefficientChange{Float64}(z, 1.0))
 
-    @test MOI.canmodifyobjective(instance, MOI.ScalarCoefficientChange{Float64}(z, 2.0))
+    @test MOI.canmodifyobjective(instance, MOI.ScalarCoefficientChange{Float64})
     MOI.modifyobjective!(instance, MOI.ScalarCoefficientChange{Float64}(z, 2.0))
 
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}()) == 1
@@ -208,7 +208,7 @@ function linear1test(instance::MOI.AbstractInstance, config::TestConfig)
     # s.t. x + y + z <= 1
     # x >= -1
     # y,z >= 0
-    @test MOI.canmodifyconstraint(instance, vc1, MOI.GreaterThan(-1.0))
+    @test MOI.canmodifyconstraint(instance, vc1, MOI.GreaterThan{Float64})
     MOI.modifyconstraint!(instance, vc1, MOI.GreaterThan(-1.0))
 
     if config.solve
@@ -231,7 +231,7 @@ function linear1test(instance::MOI.AbstractInstance, config::TestConfig)
     # max x + 2z
     # s.t. x + y + z <= 1
     # x, y >= 0, z = 0
-    @test MOI.canmodifyconstraint(instance, vc1, MOI.GreaterThan(0.0))
+    @test MOI.canmodifyconstraint(instance, vc1, MOI.GreaterThan{Float64})
     MOI.modifyconstraint!(instance, vc1, MOI.GreaterThan(0.0))
 
     @test MOI.candelete(instance, vc3)
@@ -581,7 +581,7 @@ function linear4test(instance::MOI.AbstractInstance, config::TestConfig)
     # Min  x - y
     # s.t. 100.0 <= x
     #               y <= 0.0
-    @test MOI.canmodifyconstraint(instance, c1, MOI.GreaterThan(100.0))
+    @test MOI.canmodifyconstraint(instance, c1, MOI.GreaterThan{Float64})
     MOI.modifyconstraint!(instance, c1, MOI.GreaterThan(100.0))
     if config.solve
         MOI.optimize!(instance)
@@ -596,7 +596,7 @@ function linear4test(instance::MOI.AbstractInstance, config::TestConfig)
     # Min  x - y
     # s.t. 100.0 <= x
     #               y <= -100.0
-    @test MOI.canmodifyconstraint(instance, c2, MOI.LessThan(-100.0))
+    @test MOI.canmodifyconstraint(instance, c2, MOI.LessThan{Float64})
     MOI.modifyconstraint!(instance, c2, MOI.LessThan(-100.0))
     if config.solve
         MOI.optimize!(instance)
@@ -685,7 +685,7 @@ function linear5test(instance::MOI.AbstractInstance, config::TestConfig)
     #
     #   solution: x = 2, y = 0, objv = 2
 
-    @test MOI.canmodifyconstraint(instance, c1, MOI.ScalarCoefficientChange(y, 3.0))
+    @test MOI.canmodifyconstraint(instance, c1, MOI.ScalarCoefficientChange{Float64})
     MOI.modifyconstraint!(instance, c1, MOI.ScalarCoefficientChange(y, 3.0))
     if config.solve
         MOI.optimize!(instance)
@@ -795,7 +795,7 @@ function linear6test(instance::MOI.AbstractInstance, config::TestConfig)
     # Min  x - y
     # s.t. 100.0 <= x
     #               y <= 0.0
-    @test MOI.canmodifyconstraint(instance, c1, MOI.GreaterThan(100.0))
+    @test MOI.canmodifyconstraint(instance, c1, MOI.GreaterThan{Float64})
     MOI.modifyconstraint!(instance, c1, MOI.GreaterThan(100.0))
     if config.solve
         MOI.optimize!(instance)
@@ -810,7 +810,7 @@ function linear6test(instance::MOI.AbstractInstance, config::TestConfig)
     # Min  x - y
     # s.t. 100.0 <= x
     #               y <= -100.0
-    @test MOI.canmodifyconstraint(instance, c2, MOI.LessThan(-100.0))
+    @test MOI.canmodifyconstraint(instance, c2, MOI.LessThan{Float64})
     MOI.modifyconstraint!(instance, c2, MOI.LessThan(-100.0))
     if config.solve
         MOI.optimize!(instance)
@@ -862,7 +862,7 @@ function linear7test(instance::MOI.AbstractInstance, config::TestConfig)
     # Min  x - y
     # s.t. 100.0 <= x
     #               y <= 0.0
-    @test MOI.canmodifyconstraint(instance, c1, MOI.VectorConstantChange([-100.0]))
+    @test MOI.canmodifyconstraint(instance, c1, MOI.VectorConstantChange{Float64})
     MOI.modifyconstraint!(instance, c1, MOI.VectorConstantChange([-100.0]))
     if config.solve
         MOI.optimize!(instance)
@@ -877,7 +877,7 @@ function linear7test(instance::MOI.AbstractInstance, config::TestConfig)
     # Min  x - y
     # s.t. 100.0 <= x
     #               y <= -100.0
-    @test MOI.canmodifyconstraint(instance, c2, MOI.VectorConstantChange([100.0]))
+    @test MOI.canmodifyconstraint(instance, c2, MOI.VectorConstantChange{Float64})
     MOI.modifyconstraint!(instance, c2, MOI.VectorConstantChange([100.0]))
     if config.solve
         MOI.optimize!(instance)
@@ -1167,7 +1167,7 @@ function linear10test(instance::MOI.AbstractInstance, config::TestConfig)
         end
     end
 
-    @test MOI.canmodifyconstraint(instance, c, MOI.Interval(2.0, 12.0))
+    @test MOI.canmodifyconstraint(instance, c, MOI.Interval{Float64})
     MOI.modifyconstraint!(instance, c, MOI.Interval(2.0, 12.0))
 
     if config.solve
@@ -1228,7 +1228,7 @@ function linear11test(instance::MOI.AbstractInstance, config::TestConfig)
         @test MOI.get(instance, MOI.ObjectiveValue()) ≈ 2.0 atol=atol rtol=rtol
     end
 
-    @test MOI.cantransformconstraint(instance, c2, MOI.LessThan(2.0))
+    @test MOI.cantransformconstraint(instance, c2, MOI.LessThan{Float64})
     c3 = MOI.transformconstraint!(instance, c2, MOI.LessThan(2.0))
 
     @test isa(c3, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}})
