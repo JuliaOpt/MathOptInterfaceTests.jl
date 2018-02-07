@@ -16,6 +16,7 @@ function intsoc1test(instance::MOI.AbstractInstance; atol=Base.rtoldefault(Float
         MOI.empty!(instance)
         @test MOI.isempty(instance)
 
+        MOI.canaddvariable(instance)
         x,y,z = MOI.addvariables!(instance, 3)
 
         @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())

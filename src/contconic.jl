@@ -21,6 +21,7 @@ function _lin1test(instance::MOI.AbstractInstance, config::TestConfig, vecofvars
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     v = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
@@ -108,6 +109,7 @@ function _lin2test(instance::MOI.AbstractInstance, config::TestConfig, vecofvars
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x,y,z,s = MOI.addvariables!(instance, 4)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 4
 
@@ -211,6 +213,7 @@ function lin3test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
 
     @test MOI.canaddconstraint(instance, MOI.VectorAffineFunction{Float64}, MOI.Nonnegatives)
@@ -257,6 +260,7 @@ function lin4test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
 
     @test MOI.canaddconstraint(instance, MOI.VectorAffineFunction{Float64}, MOI.Nonnegatives)
@@ -309,6 +313,7 @@ function _soc1test(instance::MOI.AbstractInstance, config::TestConfig, vecofvars
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x,y,z = MOI.addvariables!(instance, 3)
 
     @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
@@ -391,6 +396,7 @@ function _soc2test(instance::MOI.AbstractInstance, config::TestConfig, nonneg::B
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x,y,t = MOI.addvariables!(instance, 3)
 
     @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
@@ -473,6 +479,7 @@ function soc3test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x,y = MOI.addvariables!(instance, 2)
 
     @test MOI.canaddconstraint(instance, MOI.VectorAffineFunction{Float64}, MOI.Nonnegatives)
@@ -530,6 +537,7 @@ function soc4test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariables!(instance, 5)
 
     A_cols = x
@@ -609,9 +617,12 @@ function _rotatedsoc1test(instance::MOI.AbstractInstance, config::TestConfig, ab
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariables!(instance, 2)
     if abvars
+        MOI.canaddvariable(instance)
         a = MOI.addvariable!(instance)
+        MOI.canaddvariable(instance)
         b = MOI.addvariable!(instance)
         @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.EqualTo{Float64})
         vc1 = MOI.addconstraint!(instance, MOI.SingleVariable(a), MOI.EqualTo(0.5))
@@ -716,6 +727,7 @@ function rotatedsoc2test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariables!(instance, 3)
 
     @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.LessThan{Float64})
@@ -786,9 +798,13 @@ function rotatedsoc3test(instance::MOI.AbstractInstance, config::TestConfig; n=2
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariables!(instance, n)
+    MOI.canaddvariable(instance)
     u = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     v = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     t = MOI.addvariables!(instance, 2)
 
     @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.EqualTo{Float64})
@@ -905,7 +921,9 @@ function _geomean1test(instance::MOI.AbstractInstance, config::TestConfig, vecof
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     t = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     x = MOI.addvariables!(instance, n)
 
     vov = MOI.VectorOfVariables([t; x])
@@ -980,6 +998,7 @@ function _exp1test(instance::MOI.AbstractInstance, config::TestConfig, vecofvars
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     v = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
@@ -1056,6 +1075,7 @@ function exp2test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     v = MOI.addvariables!(instance, 9)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 9
 
@@ -1143,7 +1163,9 @@ function exp3test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     y = MOI.addvariable!(instance)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 2
 
@@ -1217,6 +1239,7 @@ function _sdp0test(instance::MOI.AbstractInstance, vecofvars::Bool, sdpcone, con
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     X = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
@@ -1306,8 +1329,10 @@ function _sdp1test(instance::MOI.AbstractInstance, vecofvars::Bool, sdpcone, con
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     X = MOI.addvariables!(instance, 6)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 6
+    MOI.canaddvariable(instance)
     x = MOI.addvariables!(instance, 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 9
 
@@ -1418,6 +1443,7 @@ function sdp2test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariables!(instance, 7)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 7
 
@@ -1512,8 +1538,10 @@ function _det1test(instance::MOI.AbstractInstance, config::TestConfig, vecofvars
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     t = MOI.addvariable!(instance)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 1
+    MOI.canaddvariable(instance)
     Q = MOI.addvariables!(instance, square ? 4 : 3)
     @test MOI.get(instance, MOI.NumberOfVariables()) == (square ? 5 : 4)
 
