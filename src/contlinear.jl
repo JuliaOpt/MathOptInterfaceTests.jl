@@ -22,11 +22,14 @@ function linear1test(instance::MOI.AbstractInstance, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 2
 
     cf = MOI.ScalarAffineFunction(v, [1.0,1.0], 0.0)
+    @test MOI.canaddconstraint(instance, typeof(cf), MOI.LessThan{Float64})
     c = MOI.addconstraint!(instance, cf, MOI.LessThan(1.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}()) == 1
 
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     vc1 = MOI.addconstraint!(instance, MOI.SingleVariable(v[1]), MOI.GreaterThan(0.0))
     # test fallback
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     vc2 = MOI.addconstraint!(instance, v[2], MOI.GreaterThan(0.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 2
 
@@ -155,6 +158,7 @@ function linear1test(instance::MOI.AbstractInstance, config::TestConfig)
         @test MOI.ScalarAffineFunction([v[1]], [1.0], 0.0) ≈ MOI.get(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
     end
 
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     vc3 = MOI.addconstraint!(instance, MOI.SingleVariable(v[3]), MOI.GreaterThan(0.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 3
 
@@ -237,6 +241,7 @@ function linear1test(instance::MOI.AbstractInstance, config::TestConfig)
     @test MOI.candelete(instance, vc3)
     MOI.delete!(instance, vc3)
 
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.EqualTo{Float64})
     vc3 = MOI.addconstraint!(instance, MOI.SingleVariable(v[3]), MOI.EqualTo(0.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 2
 
@@ -263,6 +268,7 @@ function linear1test(instance::MOI.AbstractInstance, config::TestConfig)
     @test MOI.candelete(instance, c)
     MOI.delete!(instance, c)
     cf = MOI.ScalarAffineFunction(v, [1.0,1.0,1.0], 0.0)
+    @test MOI.canaddconstraint(instance, typeof(cf), MOI.EqualTo{Float64})
     c = MOI.addconstraint!(instance, cf, MOI.EqualTo(2.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}()) == 0
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.EqualTo{Float64}}()) == 1
@@ -320,6 +326,7 @@ function linear1test(instance::MOI.AbstractInstance, config::TestConfig)
     # x,y >= 0, z = 0
 
     cf2 = MOI.ScalarAffineFunction(v, [1.0, -1.0, 0.0], 0.0)
+    @test MOI.canaddconstraint(instance, typeof(cf2), MOI.GreaterThan{Float64})
     c2 = MOI.addconstraint!(instance, cf2, MOI.GreaterThan(0.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.EqualTo{Float64}}()) == 1
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.GreaterThan{Float64}}()) == 1
@@ -408,10 +415,13 @@ function linear2test(instance::MOI.AbstractInstance, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 2
 
     cf = MOI.ScalarAffineFunction([x, y], [1.0,1.0], 0.0)
+    @test MOI.canaddconstraint(instance, typeof(cf), MOI.LessThan{Float64})
     c = MOI.addconstraint!(instance, cf, MOI.LessThan(1.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}()) == 1
 
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     vc1 = MOI.addconstraint!(instance, MOI.SingleVariable(x), MOI.GreaterThan(0.0))
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     vc2 = MOI.addconstraint!(instance, MOI.SingleVariable(y), MOI.GreaterThan(0.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 2
 
@@ -473,8 +483,10 @@ function linear3test(instance::MOI.AbstractInstance, config::TestConfig)
     x = MOI.addvariable!(instance)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 1
 
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     MOI.addconstraint!(instance, MOI.SingleVariable(x), MOI.GreaterThan(0.0))
     cf = MOI.ScalarAffineFunction([x], [1.0], 0.0)
+    @test MOI.canaddconstraint(instance, typeof(cf), MOI.GreaterThan{Float64})
     MOI.addconstraint!(instance, cf, MOI.GreaterThan(3.0))
 
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 1
@@ -512,8 +524,10 @@ function linear3test(instance::MOI.AbstractInstance, config::TestConfig)
     x = MOI.addvariable!(instance)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 1
 
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.LessThan{Float64})
     MOI.addconstraint!(instance, MOI.SingleVariable(x), MOI.LessThan(0.0))
     cf = MOI.ScalarAffineFunction([x], [1.0], 0.0)
+    @test MOI.canaddconstraint(instance, typeof(cf), MOI.LessThan{Float64})
     MOI.addconstraint!(instance, cf, MOI.LessThan(3.0))
 
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.LessThan{Float64}}()) == 1
@@ -564,7 +578,9 @@ function linear4test(instance::MOI.AbstractInstance, config::TestConfig)
     @test MOI.canset(instance, MOI.ObjectiveSense())
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
 
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     c1 = MOI.addconstraint!(instance, MOI.SingleVariable(x), MOI.GreaterThan(0.0))
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.LessThan{Float64})
     c2 = MOI.addconstraint!(instance, MOI.SingleVariable(y), MOI.LessThan(0.0))
 
     if config.solve
@@ -641,12 +657,16 @@ function linear5test(instance::MOI.AbstractInstance, config::TestConfig)
     cf1 = MOI.ScalarAffineFunction([x, y], [2.0,1.0], 0.0)
     cf2 = MOI.ScalarAffineFunction([x, y], [1.0,2.0], 0.0)
 
+    @test MOI.canaddconstraint(instance, typeof(cf1), MOI.LessThan{Float64})
     c1 = MOI.addconstraint!(instance, cf1, MOI.LessThan(4.0))
+    @test MOI.canaddconstraint(instance, typeof(cf2), MOI.LessThan{Float64})
     c2 = MOI.addconstraint!(instance, cf2, MOI.LessThan(4.0))
 
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}()) == 2
 
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     vc1 = MOI.addconstraint!(instance, MOI.SingleVariable(x), MOI.GreaterThan(0.0))
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     vc2 = MOI.addconstraint!(instance, MOI.SingleVariable(y), MOI.GreaterThan(0.0))
 
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.GreaterThan{Float64}}()) == 2
@@ -778,7 +798,9 @@ function linear6test(instance::MOI.AbstractInstance, config::TestConfig)
     @test MOI.canset(instance, MOI.ObjectiveSense())
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
 
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64})
     c1 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x],[1.0],0.0), MOI.GreaterThan(0.0))
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64})
     c2 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([y],[1.0],0.0), MOI.LessThan(0.0))
 
     if config.solve
@@ -845,7 +867,9 @@ function linear7test(instance::MOI.AbstractInstance, config::TestConfig)
     @test MOI.canset(instance, MOI.ObjectiveSense())
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
 
+    @test MOI.canaddconstraint(instance, MOI.VectorAffineFunction{Float64}, MOI.Nonnegatives)
     c1 = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[x],[1.0],[0.0]), MOI.Nonnegatives(1))
+    @test MOI.canaddconstraint(instance, MOI.VectorAffineFunction{Float64}, MOI.Nonpositives)
     c2 = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[y],[1.0],[0.0]), MOI.Nonpositives(1))
 
     if config.solve
@@ -904,8 +928,11 @@ function linear8atest(instance::MOI.AbstractInstance, config::TestConfig)
 
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64})
     c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x,y], [2.0,1.0], 0.0), MOI.LessThan(-1.0))
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     bndx = MOI.addconstraint!(instance, MOI.SingleVariable(x), MOI.GreaterThan(0.0))
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     bndy = MOI.addconstraint!(instance, MOI.SingleVariable(y), MOI.GreaterThan(0.0))
 
     @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
@@ -956,8 +983,11 @@ function linear8btest(instance::MOI.AbstractInstance, config::TestConfig)
 
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64})
     MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x,y], [-1.0,2.0], 0.0), MOI.LessThan(0.0))
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     MOI.addconstraint!(instance, MOI.SingleVariable(x), MOI.GreaterThan(0.0))
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     MOI.addconstraint!(instance, MOI.SingleVariable(y), MOI.GreaterThan(0.0))
 
     @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
@@ -998,8 +1028,11 @@ function linear8ctest(instance::MOI.AbstractInstance, config::TestConfig)
 
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64})
     MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x,y], [1.0,-1.0], 0.0), MOI.EqualTo(0.0))
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     MOI.addconstraint!(instance, MOI.SingleVariable(x), MOI.GreaterThan(0.0))
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     MOI.addconstraint!(instance, MOI.SingleVariable(y), MOI.GreaterThan(0.0))
 
     @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
@@ -1123,6 +1156,7 @@ function linear10test(instance::MOI.AbstractInstance, config::TestConfig)
         [MOI.GreaterThan(0.0), MOI.GreaterThan(0.0)]
     )
 
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.Interval{Float64})
     c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x,y], [1.0, 1.0], 0.0), MOI.Interval(5.0, 10.0))
 
     @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
@@ -1212,7 +1246,9 @@ function linear11test(instance::MOI.AbstractInstance, config::TestConfig)
 
     v = MOI.addvariables!(instance, 2)
 
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64})
     c1 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(v, [1.0,1.0], 0.0), MOI.GreaterThan(1.0))
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64})
     c2 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(v, [1.0,1.0], 0.0), MOI.GreaterThan(2.0))
 
     @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
@@ -1259,9 +1295,13 @@ function linear12test(instance::MOI.AbstractInstance, config::TestConfig)
 
     x = MOI.addvariable!(instance)
     y = MOI.addvariable!(instance)
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64})
     c1 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x,y], [2.0,-3.0], 0.0), MOI.LessThan(-7.0))
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64})
     c2 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([y], [1.0], 0.0), MOI.LessThan(2.0))
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     bndx = MOI.addconstraint!(instance, MOI.SingleVariable(x), MOI.GreaterThan(0.0))
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
     bndy = MOI.addconstraint!(instance, MOI.SingleVariable(y), MOI.GreaterThan(0.0))
 
     @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())

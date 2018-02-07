@@ -22,22 +22,28 @@ function int1test(instance::MOI.AbstractInstance, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
     cf = MOI.ScalarAffineFunction(v, [1.0,1.0,1.0], 0.0)
+    @test MOI.canaddconstraint(instance, typeof(cf), MOI.LessThan{Float64})
     c = MOI.addconstraint!(instance, cf, MOI.LessThan(10.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}()) == 1
 
     cf2 = MOI.ScalarAffineFunction(v, [1.0,2.0,1.0], 0.0)
+    @test MOI.canaddconstraint(instance, typeof(cf2), MOI.LessThan{Float64})
     c2 = MOI.addconstraint!(instance, cf2, MOI.LessThan(15.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}()) == 2
 
 
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.Interval{Float64})
     MOI.addconstraint!(instance, MOI.SingleVariable(v[1]), MOI.Interval(0.0, 5.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.Interval{Float64}}()) == 1
 
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.Interval{Float64})
     MOI.addconstraint!(instance, MOI.SingleVariable(v[2]), MOI.Interval(0.0, 10.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.Interval{Float64}}()) == 2
+    @test MOI.canaddconstraint(instance, typeof(MOI.SingleVariable(v[2])), MOI.Integer)
     MOI.addconstraint!(instance, MOI.SingleVariable(v[2]), MOI.Integer())
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.Integer}()) == 1
 
+    @test MOI.canaddconstraint(instance, typeof(MOI.SingleVariable(v[3])), MOI.ZeroOne)
     MOI.addconstraint!(instance, MOI.SingleVariable(v[3]), MOI.ZeroOne())
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.ZeroOne}()) == 1
 
@@ -112,11 +118,16 @@ function int2test(instance::MOI.AbstractInstance, config::TestConfig)
 
         v = MOI.addvariables!(instance, 3)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 3
+        @test MOI.canaddconstraint(instance, typeof(MOI.SingleVariable(v[1])), MOI.LessThan{Float64})
         MOI.addconstraint!(instance, MOI.SingleVariable(v[1]), MOI.LessThan(1.0))
+        @test MOI.canaddconstraint(instance, typeof(MOI.SingleVariable(v[2])), MOI.LessThan{Float64})
         MOI.addconstraint!(instance, MOI.SingleVariable(v[2]), MOI.LessThan(1.0))
+        @test MOI.canaddconstraint(instance, typeof(MOI.SingleVariable(v[3])), MOI.LessThan{Float64})
         MOI.addconstraint!(instance, MOI.SingleVariable(v[3]), MOI.LessThan(2.0))
 
+        @test MOI.canaddconstraint(instance, MOI.VectorOfVariables, MOI.SOS1{Float64})
         c1 = MOI.addconstraint!(instance, MOI.VectorOfVariables([v[1], v[2]]), MOI.SOS1([1.0, 2.0]))
+        @test MOI.canaddconstraint(instance, MOI.VectorOfVariables, MOI.SOS1{Float64})
         c2 = MOI.addconstraint!(instance, MOI.VectorOfVariables([v[1], v[3]]), MOI.SOS1([1.0, 2.0]))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorOfVariables,MOI.SOS1}()) == 2
 
@@ -204,7 +215,9 @@ function int2test(instance::MOI.AbstractInstance, config::TestConfig)
 
         bin_constraints = []
         for i in 1:8
+            @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.Interval{Float64})
             MOI.addconstraint!(instance, MOI.SingleVariable(v[i]), MOI.Interval(0.0, 2.0))
+            @test MOI.canaddconstraint(instance, typeof(MOI.SingleVariable(v[i])), MOI.ZeroOne)
             push!(bin_constraints, MOI.addconstraint!(instance, MOI.SingleVariable(v[i]), MOI.ZeroOne()))
         end
 
@@ -225,6 +238,7 @@ function int2test(instance::MOI.AbstractInstance, config::TestConfig)
 
         vv   = MOI.VectorOfVariables(v[[4,5,6,7,8]])
         sos2 = MOI.SOS2([5.0, 4.0, 7.0, 2.0, 1.0])
+        @test MOI.canaddconstraint(instance, typeof(vv), MOI.SOS2{Float64})
         c = MOI.addconstraint!(instance, vv, sos2)
 
         @test MOI.canget(instance, MOI.ConstraintSet(), typeof(c))
@@ -318,15 +332,19 @@ function int3test(instance::MOI.AbstractInstance, config::TestConfig)
     #)
 
     z = MOI.addvariable!(instance)
+    @test MOI.canaddconstraint(instance, typeof(MOI.SingleVariable(z)), MOI.Integer)
     MOI.addconstraint!(instance, MOI.SingleVariable(z), MOI.Integer())
+    @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.Integer)
     MOI.addconstraint!(instance, MOI.SingleVariable(z), MOI.Interval(0.0, 100.0))
 
     b = MOI.addvariables!(instance, 10)
 
     for bi in b
+        @test MOI.canaddconstraint(instance, typeof(MOI.SingleVariable(bi)), MOI.ZeroOne)
         MOI.addconstraint!(instance, MOI.SingleVariable(bi), MOI.ZeroOne())
     end
 
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.Interval{Float64})
     c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(vcat(z, b), vcat(1.0, fill(-0.5 / 40, 10)), 0.0), MOI.Interval(0.0, 0.999))
 
     @test MOI.canset(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
@@ -380,9 +398,11 @@ function knapsacktest(instance::MOI.AbstractInstance, config::TestConfig)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 5
 
     for vi in v
+        @test MOI.canaddconstraint(instance, typeof(MOI.SingleVariable(vi)), MOI.ZeroOne)
         MOI.addconstraint!(instance, MOI.SingleVariable(vi), MOI.ZeroOne())
     end
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable,MOI.ZeroOne}()) == 5
+    @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64})
     c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(v, [2.0, 8.0, 4.0, 2.0, 5.0], 0.0), MOI.LessThan(10.0))
     @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}()) == 1
 
