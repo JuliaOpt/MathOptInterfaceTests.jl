@@ -23,7 +23,9 @@ function intsoc1test(instance::MOI.AbstractInstance; atol=Base.rtoldefault(Float
         @test MOI.canset(instance, MOI.ObjectiveSense())
         MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
 
+        @test MOI.canaddconstraint(instance, MOI.VectorAffineFunction{Float64}, MOI.Zeros)
         ceq = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1],[x],[1.0],[-1.0]), MOI.Zeros(1))
+        @test MOI.canaddconstraint(instance, MOI.VectorOfVariables, MOI.SecondOrderCone)
         csoc = MOI.addconstraint!(instance, MOI.VectorOfVariables([x,y,z]), MOI.SecondOrderCone(3))
 
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64},MOI.Zeros}()) == 1
@@ -33,7 +35,9 @@ function intsoc1test(instance::MOI.AbstractInstance; atol=Base.rtoldefault(Float
         @test (MOI.VectorAffineFunction{Float64},MOI.Zeros) in loc
         @test (MOI.VectorOfVariables,MOI.SecondOrderCone) in loc
 
+        @test MOI.canaddconstraint(instance, typeof(MOI.SingleVariable(y)), typeof(MOI.ZeroOne))
         bin1 = MOI.addconstraint!(instance, MOI.SingleVariable(y), MOI.ZeroOne)
+        @test MOI.canaddconstraint(instance, typeof(MOI.SingleVariable(z)), typeof(MOI.ZeroOne))
         bin2 = MOI.addconstraint!(instance, MOI.SingleVariable(z), MOI.ZeroOne)
 
         if config.solve

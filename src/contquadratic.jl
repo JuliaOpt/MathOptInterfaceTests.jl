@@ -19,9 +19,11 @@ function qp1test(instance::MOI.AbstractInstance, config::TestConfig)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
         cf1 = MOI.ScalarAffineFunction(v, [1.0,2.0,3.0], 0.0)
+        @test MOI.canaddconstraint(instance, typeof(cf1), MOI.GreaterThan{Float64})
         c1 = MOI.addconstraint!(instance, cf1, MOI.GreaterThan(4.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}()) == 1
 
+        @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64})
         c2 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([v[1],v[2]], [1.0,1.0], 0.0), MOI.GreaterThan(1.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}()) == 2
 
@@ -82,9 +84,11 @@ function qp2test(instance::MOI.AbstractInstance, config::TestConfig)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
         c1f = MOI.ScalarAffineFunction(v, [1.0,2.0,3.0], 0.0)
+        @test MOI.canaddconstraint(instance, typeof(c1f), MOI.GreaterThan{Float64})
         c1 = MOI.addconstraint!(instance, c1f, MOI.GreaterThan(4.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}()) == 1
 
+        @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64})
         c2 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([v[1],v[2]], [1.0,1.0], 0.0), MOI.GreaterThan(1.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}()) == 2
 
@@ -180,7 +184,9 @@ function qp3test(instance::MOI.AbstractInstance, config::TestConfig)
             MOI.EqualTo(1.0)
         )
 
+        @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
         MOI.addconstraint!(instance, MOI.SingleVariable(x), MOI.GreaterThan(0.0))
+        @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
         MOI.addconstraint!(instance, MOI.SingleVariable(y), MOI.GreaterThan(0.0))
 
         obj = MOI.ScalarQuadraticFunction(
@@ -269,10 +275,12 @@ function qcp1test(instance::MOI.AbstractInstance, config::TestConfig)
         y = MOI.addvariable!(instance)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 2
 
+        @test MOI.canaddconstraint(instance, MOI.VectorAffineFunction{Float64}, MOI.Nonnegatives)
         c1 = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,2,2], [x,y,x,y], [-1.0,1.0,1.0,1.0], [0.0,0.0]), MOI.Nonnegatives(2))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.Nonnegatives}()) == 1
 
         c2f = MOI.ScalarQuadraticFunction([y],[1.0],[x],[x],[1.0], 0.0)
+        @test MOI.canaddconstraint(instance, typeof(c2f), MOI.LessThan{Float64})
         c2 = MOI.addconstraint!(instance, c2f, MOI.LessThan(2.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}()) == 1
 
@@ -337,6 +345,7 @@ function qcp2test(instance::MOI.AbstractInstance, config::TestConfig)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 1
 
         cf = MOI.ScalarQuadraticFunction(MOI.VariableIndex[x],Float64[0.0],[x],[x],[1.0], 0.0)
+        @test MOI.canaddconstraint(instance, typeof(cf), MOI.LessThan{Float64})
         c = MOI.addconstraint!(instance, cf, MOI.LessThan(2.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}()) == 1
 
@@ -394,6 +403,7 @@ function qcp3test(instance::MOI.AbstractInstance, config::TestConfig)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 1
 
         cf = MOI.ScalarQuadraticFunction(MOI.VariableIndex[],Float64[],[x],[x],[1.0], 0.0)
+        @test MOI.canaddconstraint(instance, typeof(cf), MOI.LessThan{Float64})
         c = MOI.addconstraint!(instance, cf, MOI.LessThan(2.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}()) == 1
 
@@ -467,13 +477,16 @@ function socp1test(instance::MOI.AbstractInstance, config::TestConfig)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
         c1f = MOI.ScalarAffineFunction([x,y],[1.0, 1.0], 0.0)
+        @test MOI.canaddconstraint(instance, typeof(c1f), MOI.GreaterThan{Float64})
         c1 = MOI.addconstraint!(instance, c1f, MOI.GreaterThan(1.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}()) == 1
 
         c2f = MOI.ScalarQuadraticFunction(MOI.VariableIndex[],Float64[],[x,y,t],[x,y,t],[1.0,1.0,-1.0], 0.0)
+        @test MOI.canaddconstraint(instance, typeof(c2f), MOI.LessThan{Float64})
         c2 = MOI.addconstraint!(instance, c2f, MOI.LessThan(0.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}()) == 1
 
+        @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.GreaterThan{Float64})
         bound = MOI.addconstraint!(instance, MOI.SingleVariable(t), MOI.GreaterThan(0.0))
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.SingleVariable, MOI.GreaterThan{Float64}}()) == 1
 

@@ -35,7 +35,9 @@ function nametest(instance::MOI.AbstractInstance)
             @test_throws KeyError MOI.get(instance, MOI.VariableIndex, "Var2")
         end
 
+        @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64})
         c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(v, [1.0,1.0], 0.0), MOI.LessThan(1.0))
+        @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64})
         c2 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction(v, [-1.0,1.0], 0.0), MOI.EqualTo(0.0))
         @test MOI.canget(instance, MOI.ConstraintName(), typeof(c))
         @test MOI.get(instance, MOI.ConstraintName(), c) == ""
@@ -82,6 +84,7 @@ function validtest(instance::MOI.AbstractInstance)
     MOI.delete!(instance, x)
     @test !MOI.isvalid(instance, x)
     cf = MOI.ScalarAffineFunction(v, [1.0,1.0], 0.0)
+    @test MOI.canaddconstraint(instance, typeof(cf), MOI.LessThan{Float64})
     c = MOI.addconstraint!(instance, cf, MOI.LessThan(1.0))
     @test MOI.isvalid(instance, c)
     @test !MOI.isvalid(instance, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float32},MOI.LessThan{Float32}}(1))
@@ -93,7 +96,9 @@ end
 function emptytest(instance::MOI.AbstractInstance)
     # Taken from LIN1
     v = MOI.addvariables!(instance, 3)
+    @test MOI.canaddconstraint(instance, MOI.VectorOfVariables, MOI.Nonnegatives)
     vc = MOI.addconstraint!(instance, MOI.VectorOfVariables(v), MOI.Nonnegatives(3))
+    @test MOI.canaddconstraint(instance, MOI.VectorAffineFunction{Float64}, MOI.Zeros)
     c = MOI.addconstraint!(instance, MOI.VectorAffineFunction([1,1,1,2,2], [v;v[2];v[3]], ones(5), [-3.0,-2.0]), MOI.Zeros(2))
     MOI.set!(instance, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}(), MOI.ScalarAffineFunction(v, [-3.0, -2.0, -4.0], 0.0))
     MOI.set!(instance, MOI.ObjectiveSense(), MOI.MinSense)
