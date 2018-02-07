@@ -7,6 +7,7 @@ function nametest(instance::MOI.AbstractInstance)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 0
         @test MOI.get(instance, MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64},MOI.LessThan{Float64}}()) == 0
 
+        MOI.canaddvariable(instance)
         v = MOI.addvariables!(instance, 2)
         @test MOI.canget(instance, MOI.VariableName(), typeof(v[1]))
         @test MOI.get(instance, MOI.VariableName(), v[1]) == ""
@@ -76,9 +77,11 @@ end
 
 # Taken from https://github.com/JuliaOpt/MathOptInterfaceUtilities.jl/issues/41
 function validtest(instance::MOI.AbstractInstance)
+    MOI.canaddvariable(instance)
     v = MOI.addvariables!(instance, 2)
     @test MOI.isvalid(instance, v[1])
     @test MOI.isvalid(instance, v[2])
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
     @test MOI.isvalid(instance, x)
     MOI.delete!(instance, x)
@@ -95,6 +98,7 @@ end
 
 function emptytest(instance::MOI.AbstractInstance)
     # Taken from LIN1
+    MOI.canaddvariable(instance)
     v = MOI.addvariables!(instance, 3)
     @test MOI.canaddconstraint(instance, MOI.VectorOfVariables, MOI.Nonnegatives)
     vc = MOI.addconstraint!(instance, MOI.VectorOfVariables(v), MOI.Nonnegatives(3))
@@ -163,6 +167,7 @@ failcopytestva(dest::MOI.AbstractInstance) = failcopytest(dest, BadVariableAttri
 failcopytestca(dest::MOI.AbstractInstance) = failcopytest(dest, BadConstraintAttributeInstance(), MOI.CopyUnsupportedAttribute)
 
 function copytest(dest::MOI.AbstractInstance, src::MOI.AbstractInstance)
+    MOI.canaddvariable(src)
     v = MOI.addvariables!(src, 3)
     csv = MOI.addconstraint!(src, MOI.SingleVariable(v[2]), MOI.EqualTo(2.))
     cvv = MOI.addconstraint!(src, MOI.VectorOfVariables(v), MOI.Nonnegatives(3))
@@ -215,6 +220,7 @@ function copytest(dest::MOI.AbstractInstance, src::MOI.AbstractInstance)
 end
 
 function canaddconstrainttest(instance::MOI.AbstractInstance, ::Type{GoodT}, ::Type{BadT}) where {GoodT, BadT}
+    MOI.canaddvariable(instance)
     v = MOI.addvariable!(instance)
     @test MOI.canaddconstraint(instance, MOI.SingleVariable, MOI.EqualTo{GoodT})
     @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{GoodT}, MOI.EqualTo{GoodT})

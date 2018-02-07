@@ -18,6 +18,7 @@ function linear1test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     v = MOI.addvariables!(instance, 2)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 2
 
@@ -145,6 +146,7 @@ function linear1test(instance::MOI.AbstractInstance, config::TestConfig)
     # s.t. x + y + z <= 1
     # x,y,z >= 0
 
+    MOI.canaddvariable(instance)
     z = MOI.addvariable!(instance)
     push!(v, z)
     @test v[3] == z
@@ -409,7 +411,9 @@ function linear2test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     y = MOI.addvariable!(instance)
 
     @test MOI.get(instance, MOI.NumberOfVariables()) == 2
@@ -480,6 +484,7 @@ function linear3test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 1
 
@@ -521,6 +526,7 @@ function linear3test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
     @test MOI.get(instance, MOI.NumberOfVariables()) == 1
 
@@ -566,7 +572,9 @@ function linear4test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     y = MOI.addvariable!(instance)
 
     # Min  x - y
@@ -649,7 +657,9 @@ function linear5test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     y = MOI.addvariable!(instance)
 
     @test MOI.get(instance, MOI.NumberOfVariables()) == 2
@@ -786,7 +796,9 @@ function linear6test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     y = MOI.addvariable!(instance)
 
     # Min  x - y
@@ -855,7 +867,9 @@ function linear7test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     y = MOI.addvariable!(instance)
 
     # Min  x - y
@@ -926,7 +940,9 @@ function linear8atest(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     y = MOI.addvariable!(instance)
     @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64})
     c = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x,y], [2.0,1.0], 0.0), MOI.LessThan(-1.0))
@@ -981,7 +997,9 @@ function linear8btest(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     y = MOI.addvariable!(instance)
     @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64})
     MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x,y], [-1.0,2.0], 0.0), MOI.LessThan(0.0))
@@ -1026,7 +1044,9 @@ function linear8ctest(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     y = MOI.addvariable!(instance)
     @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64})
     MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x,y], [1.0,-1.0], 0.0), MOI.EqualTo(0.0))
@@ -1088,7 +1108,9 @@ function linear9test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     y = MOI.addvariable!(instance)
 
     MOI.addconstraints!(instance,
@@ -1148,7 +1170,9 @@ function linear10test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     y = MOI.addvariable!(instance)
 
     MOI.addconstraints!(instance,
@@ -1244,6 +1268,7 @@ function linear11test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     v = MOI.addvariables!(instance, 2)
 
     @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64})
@@ -1293,7 +1318,9 @@ function linear12test(instance::MOI.AbstractInstance, config::TestConfig)
     MOI.empty!(instance)
     @test MOI.isempty(instance)
 
+    MOI.canaddvariable(instance)
     x = MOI.addvariable!(instance)
+    MOI.canaddvariable(instance)
     y = MOI.addvariable!(instance)
     @test MOI.canaddconstraint(instance, MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64})
     c1 = MOI.addconstraint!(instance, MOI.ScalarAffineFunction([x,y], [2.0,-3.0], 0.0), MOI.LessThan(-7.0))

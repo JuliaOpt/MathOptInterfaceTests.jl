@@ -15,6 +15,7 @@ function qp1test(instance::MOI.AbstractInstance, config::TestConfig)
         MOI.empty!(instance)
         @test MOI.isempty(instance)
 
+        MOI.canaddvariable(instance)
         v = MOI.addvariables!(instance, 3)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
@@ -80,6 +81,7 @@ function qp2test(instance::MOI.AbstractInstance, config::TestConfig)
         MOI.empty!(instance)
         @test MOI.isempty(instance)
 
+        MOI.canaddvariable(instance)
         v = MOI.addvariables!(instance, 3)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
@@ -176,7 +178,9 @@ function qp3test(instance::MOI.AbstractInstance, config::TestConfig)
         MOI.empty!(instance)
         @test MOI.isempty(instance)
 
+        MOI.canaddvariable(instance)
         x = MOI.addvariable!(instance)
+        MOI.canaddvariable(instance)
         y = MOI.addvariable!(instance)
 
         MOI.addconstraint!(instance,
@@ -271,7 +275,9 @@ function qcp1test(instance::MOI.AbstractInstance, config::TestConfig)
         MOI.empty!(instance)
         @test MOI.isempty(instance)
 
+        MOI.canaddvariable(instance)
         x = MOI.addvariable!(instance)
+        MOI.canaddvariable(instance)
         y = MOI.addvariable!(instance)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 2
 
@@ -341,6 +347,7 @@ function qcp2test(instance::MOI.AbstractInstance, config::TestConfig)
         MOI.empty!(instance)
         @test MOI.isempty(instance)
 
+        MOI.canaddvariable(instance)
         x = MOI.addvariable!(instance)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 1
 
@@ -399,6 +406,7 @@ function qcp3test(instance::MOI.AbstractInstance, config::TestConfig)
         MOI.empty!(instance)
         @test MOI.isempty(instance)
 
+        MOI.canaddvariable(instance)
         x = MOI.addvariable!(instance)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 1
 
@@ -471,8 +479,11 @@ function socp1test(instance::MOI.AbstractInstance, config::TestConfig)
         MOI.empty!(instance)
         @test MOI.isempty(instance)
 
+        MOI.canaddvariable(instance)
         x = MOI.addvariable!(instance)
+        MOI.canaddvariable(instance)
         y = MOI.addvariable!(instance)
+        MOI.canaddvariable(instance)
         t = MOI.addvariable!(instance)
         @test MOI.get(instance, MOI.NumberOfVariables()) == 3
 
