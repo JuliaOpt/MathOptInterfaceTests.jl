@@ -125,6 +125,7 @@ end
 
 abstract type BadInstance <: MOI.AbstractInstance end
 MOI.get(src::BadInstance, ::MOI.ListOfInstanceAttributesSet) = MOI.AbstractInstanceAttribute[]
+MOI.get(src::BadInstance, ::MOI.NumberOfVariables) = 1
 MOI.get(src::BadInstance, ::MOI.ListOfVariableIndices) = [MOI.VariableIndex(1)]
 MOI.get(src::BadInstance, ::MOI.ListOfVariableAttributesSet) = MOI.AbstractVariableAttribute[]
 MOI.get(src::BadInstance, ::MOI.ListOfConstraints) = [(MOI.SingleVariable, MOI.EqualTo{Float64})]
