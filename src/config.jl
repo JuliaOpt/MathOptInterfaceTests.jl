@@ -20,8 +20,8 @@ end
 """
     @moitestset setname subsets
 
-Defines a function `setnametest(instance, config, exclude)` that runs the tests defined in the dictionary `setnametests`
-with the instance `instance` and config `config` except the tests whose dictionary key is in `exclude`.
+Defines a function `setnametest(model, config, exclude)` that runs the tests defined in the dictionary `setnametests`
+with the model `model` and config `config` except the tests whose dictionary key is in `exclude`.
 If `subsets` is `true` then each test runs in fact multiple tests hence the `exclude` argument is passed
 as it can also contains test to be excluded from these subsets of tests.
 """
@@ -29,12 +29,12 @@ macro moitestset(setname, subsets=false)
     testname = Symbol(string(setname) * "test")
     testdict = Symbol(string(testname) * "s")
     if subsets
-        runtest = :( f(instance, config, exclude) )
+        runtest = :( f(model, config, exclude) )
     else
-        runtest = :( f(instance, config) )
+        runtest = :( f(model, config) )
     end
     :(
-        function $testname(instance::MOI.AbstractInstance, config::TestConfig, exclude::Vector{String} = String[])
+        function $testname(model::MOI.ModelLike, config::TestConfig, exclude::Vector{String} = String[])
             for (name,f) in $testdict
                 if name in exclude
                     continue
