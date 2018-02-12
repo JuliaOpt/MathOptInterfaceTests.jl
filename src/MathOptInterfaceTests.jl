@@ -7,7 +7,7 @@ using Base.Test
 
 include("config.jl")
 
-include("instance.jl")
+include("modellike.jl")
 
 include("contlinear.jl")
 include("contconic.jl")
