@@ -47,6 +47,7 @@ function linear1test(model::MOI.ModelLike, config::TestConfig)
         vrs = MOI.get(model, MOI.ListOfVariableIndices())
         @test vrs == v || vrs == reverse(v)
 
+        @test !MOI.canget(model, MOI.ObjectiveFunction{MOI.SingleVariable}())
         @test MOI.canget(model, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
         @test objf ≈ MOI.get(model, MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}())
 
